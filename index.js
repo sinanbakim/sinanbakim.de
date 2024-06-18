@@ -19,6 +19,10 @@ app.get('/', function (req, res) {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+app.post('/test', function (req, res) {
+    res.send('Hello World');
+});
+
 app.listen(port, function () {
     console.log('Server is running on port ' + port);
 });
