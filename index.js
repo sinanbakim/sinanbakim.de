@@ -69,4 +69,4 @@ findAvailablePort(startPort, endPort).then((port) => {
     } else {
         console.log('No available port found');
     }
-}
+});
