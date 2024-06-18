@@ -21,32 +21,29 @@ function checkIfPortIsAvailable(port) {
         });
 
         server.on('error', function (err) {
+            server.close(); // Stellen Sie sicher, dass der Server geschlossen wird, auch wenn ein Fehler auftritt
             if (err.code === 'EADDRINUSE') {
-                resolve(false);
+                resolve(false); // Der Port ist bereits in Gebrauch
+            } else {
+                reject(err); // Ein anderer Fehler tritt auf, lehnen Sie das Promise mit dem Fehler ab
             }
         });
 
         server.listen(port, function () {
-            server.close();
-            resolve(true);
+            server.close(); // Schließen Sie den Server, nachdem erfolgreich festgestellt wurde, dass der Port frei ist
+            resolve(true); // Der Port ist verfügbar
         });
     });
 }
 
-function findAvailablePort(minPort, maxPort) {
-    return new Promise((resolve, reject) => {
-        var port = minPort;
-        var limit = maxPort;
-        var isAvailable = false;
-        while (!isAvailable && port <= limit) {
-            isAvailable = checkIfPortIsAvailable(port);
-            if (isAvailable) {
-                resolve(port);
-            }
-            port++;
+async function findAvailablePort(minPort, maxPort) {
+    for (let port = minPort; port <= maxPort; port++) {
+        const isAvailable = await checkIfPortIsAvailable(port);
+        if (isAvailable) {
+            return port;
         }
-        resolve(null);
-    });
+    }
+    return null; // Kein verfügbarer Port gefunden
 }
 
 app.use(bodyParser.json());
