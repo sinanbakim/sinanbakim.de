@@ -1,27 +1,25 @@
 {
-    "name": "sinanbakim.de",
-    "version": "1.0.0",
-    "description": "",
-    "main": "index.js",
-    "scripts": {
-        "start": "node index.js"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/sinanbakim/sinanbakim.de.git"
-    },
-    "author": "",
-    "license": "ISC",
-    "bugs": {
-        "url": "https://github.com/sinanbakim/sinanbakim.de/issues"
-    },
-    "homepage": "https://github.com/sinanbakim/sinanbakim.de#readme",
-    "dependencies": {
-        "body-parser": "^1.20.2",
-        "dotenv": "^16.4.5",
-        "express": "^4.19.2"
-    },
-    "devDependencies": {
-        "http-server": "^14.1.1"
-    }
+	"name": "sinanbakim.de",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/sinanbakim/sinanbakim.de.git"
+	},
+	"author": "",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/sinanbakim/sinanbakim.de/issues"
+	},
+	"homepage": "https://github.com/sinanbakim/sinanbakim.de#readme",
+	"dependencies": {
+		"body-parser": "^1.20.2",
+		"dotenv": "^16.4.5",
+		"express": "^4.19.2"
+	},
+	"devDependencies": {
+		"http-server": "^14.1.1"
+	}
 }
