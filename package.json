@@ -3,7 +3,10 @@
 	"version": "1.0.0",
 	"description": "",
 	"main": "index.js",
-	"scripts": {},
+	"scripts": {
+		"start": "node server.js",
+		"dev": "npx http-server . -p 0 -o ./public/index.html -d false --no-dotfiles -c-1"
+	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/sinanbakim/sinanbakim.de.git"
