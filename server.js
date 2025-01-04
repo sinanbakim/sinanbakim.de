@@ -15,7 +15,7 @@ if (!process.env.PORT) {
 	env.configDotenv(); // Load .env file
 	if (!process.env.PORT) {
 		console.log('PORT environment variable is not set after loading .env file - setting to default value 3000');
-		process.env.PORT = 3000; // Set default port to 3000 if not set
+		process.env.PORT = 80; // Set default port to 3000 if not set
 	} else {
 		console.log('PORT environment variable is set to ' + process.env.PORT + ' after loading .env file');
 	}
