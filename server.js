@@ -26,30 +26,14 @@ console.log('PORT environment variable is set to ' + process.env.PORT);
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
-// Middleware to log all requests to the console
-app.use(function (req, res, next) {
-	console.log('Time:', Date.now());
-	next();
-});
 app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from the 'public' directory
-app.use(express.static(path.join(__dirname, 'node_modules'))); // Serve static files from the 'node_modules' directory
 
-// Routes for Web App (HTML pages)
 app.get('/test', function (req, res) {
-	res.send('Hello World');
-});
-
-app.get('/', function (req, res) {
 	res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Routes for our API (not HTML)
-app.get('/api', function (req, res) {
-	res.send('API is running');
-});
-
-app.get('/api/echo', function (req, res) {
-	res.json(req.query);
+app.get('/', function (req, res) {
+	res.send('Hello World');
 });
 
 app.listen(process.env.PORT, function () {
