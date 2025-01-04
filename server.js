@@ -5,20 +5,17 @@ var path = require('path');
 var fs = require('fs');
 var http = require('http');
 
-var env = require('dotenv').config();
 var app = express();
+var env = require('dotenv');
 
-// check if .env file is present
-if (env.error && env.error.code === 'ENOENT') {
-	console.log('No .env file found, using environment variables');
+// Load environment variables from .env file
+env.configDotenv(); // Load .env file
+
+// Plesk requires the PORT environment variable to be set - check if it is set
+if (!process.env.PORT) {
+	console.log('PORT environment variable is not set');
 } else {
-	console.log('Using .env file');
-}
 
-// check if there was an error reading the .env file
-if (env.error) {
-	throw env.error;
-}
 
 // activate logging if needed
 if (process.env.LOGGING === 'true') {
