@@ -28,14 +28,38 @@ app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x
 
 app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from the 'public' directory
 
+app.use(function (req, res, next) {
+	console.log(
+		'Time:',
+		new Date().toLocaleString('de-DE', { timeZone: 'Europe/Berlin' }) + ', Request:',
+		req.method + ' ' + req.originalUrl + ', IP:',
+		req.ip,
+		', Response:',
+		res.statusCode,
+	);
+	next();
+});
+
 app.get('/test', function (req, res) {
-	res.sendFile(path.join(__dirname, 'index.html'));
+	res.sendFile(path.join(__dirname, 'public', 'test.html'));
 });
 
 app.get('/', function (req, res) {
 	res.send('Hello World');
 });
 
+// Start the server on the specified port
 app.listen(process.env.PORT, function () {
 	console.log('Server started on port ' + process.env.PORT);
+}).on('error', function (err) {
+	console.log('Error starting server: ' + err);
+	// If the server fails to start, try to start it on port 8080
+	if (process.env.PORT === 80) {
+		process.env.PORT = 8080;
+		app.listen(process.env.PORT, function () {
+			console.log('Server started on port ' + process.env.PORT);
+		}).on('error', function (err) {
+			console.log('Error starting server on port 8080: ' + err);
+		});
+	}
 });
