@@ -23,13 +23,41 @@ if (!process.env.PORT) {
 process.env.PORT = parseInt(process.env.PORT); // Convert to number if it is a string (e.g. '3000')
 console.log('PORT environment variable is set to ' + process.env.PORT);
 
-app.use(bodyParser.json()); // for parsing application/json
-app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+// Mime types
+express.static.mime.define({ 'text/html': ['html'] });
+express.static.mime.define({ 'text/css': ['css'] });
+express.static.mime.define({ 'text/javascript': ['js'] });
+express.static.mime.define({ 'application/javascript': ['js'] });
+express.static.mime.define({ 'application/xml': ['xml'] });
+express.static.mime.define({ 'application/rss+xml': ['rss'] });
+express.static.mime.define({ 'application/atom+xml': ['atom'] });
+express.static.mime.define({ 'application/json': ['json'] });
+express.static.mime.define({ 'application/font-woff': ['woff'] });
+express.static.mime.define({ 'application/font-woff2': ['woff2'] });
+express.static.mime.define({ 'application/font-ttf': ['ttf'] });
+express.static.mime.define({ 'application/font-otf': ['otf'] });
+express.static.mime.define({ 'application/font-eot': ['eot'] });
+express.static.mime.define({ 'application/font-sfnt': ['sfnt'] });
+express.static.mime.define({ 'image/svg+xml': ['svg'] });
+express.static.mime.define({ 'image/webp': ['webp'] });
+express.static.mime.define({ 'image/png': ['png'] });
+express.static.mime.define({ 'image/jpeg': ['jpg', 'jpeg'] });
+express.static.mime.define({ 'image/gif': ['gif'] });
+express.static.mime.define({ 'image/bmp': ['bmp'] });
+express.static.mime.define({ 'image/tiff': ['tiff'] });
+express.static.mime.define({ 'image/x-icon': ['ico'] });
 
+app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+app.use(bodyParser.json({ type: ['application/json', 'application/*+json'] })); // for parsing JSON and JSON-like content
+app.use(bodyParser.text({ type: ['text/plain', 'text/html', 'text/xml', 'application/xml', 'application/rss+xml', 'application/atom+xml'] })); // for parsing text content
+app.use(bodyParser.raw()); // for parsing application/octet-stream
+
+// Serve static files
 app.use(express.static(path.join(__dirname, 'assets'))); // Serve static files from the 'assets' directory
 app.use(express.static(path.join(__dirname, 'content'))); // Serve static files from the 'content' directory
 app.use(express.static(path.join(__dirname, 'sites'))); // Serve static files from the 'sites' directory
 
+// Route for the root path - serve the index.html file
 app.get('/', function (req, res) {
 	res.sendFile(path.join(__dirname, 'sites', 'index.html'));
 });
