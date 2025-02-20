@@ -6,7 +6,7 @@ let articleMap = {};
 
 // Load JSON data and initialize the app
 document.addEventListener('DOMContentLoaded', () => {
-	fetch('content/data.json')
+	fetch('/data.json')
 		.then((response) => response.json())
 		.then((data) => {
 			pageData = data;
@@ -31,6 +31,10 @@ document.addEventListener('DOMContentLoaded', () => {
 		populateArticles(pageData.articles);
 		document.getElementById('back-btn').classList.add('hidden');
 	});
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+	console.log('Assets script loaded.');
 });
 
 // Render navigation using the pagetree from JSON

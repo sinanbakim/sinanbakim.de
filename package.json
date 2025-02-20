@@ -1,8 +1,9 @@
 {
 	"name": "sinanbakim.de",
 	"version": "1.0.0",
-	"description": "",
-	"main": "index.js",
+	"description": "Personal website of Sinan Bakim",
+	"author": "Sinan Bakim",
+	"main": "server.js",
 	"scripts": {
 		"start": "node server.js",
 		"dev": "npx http-server . -p 0 -o ./index.html -d false --no-dotfiles -c-1"
@@ -11,12 +12,11 @@
 		"type": "git",
 		"url": "git+https://github.com/sinanbakim/sinanbakim.de.git"
 	},
-	"author": "",
 	"license": "ISC",
 	"bugs": {
 		"url": "https://github.com/sinanbakim/sinanbakim.de/issues"
 	},
-	"homepage": "https://github.com/sinanbakim/sinanbakim.de#readme",
+	"homepage": "https://sinanbakim.de",
 	"dependencies": {
 		"body-parser": "^1.20.2",
 		"dotenv": "^16.4.5",
