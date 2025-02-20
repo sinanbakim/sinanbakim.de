@@ -28,9 +28,10 @@ app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x
 
 app.use(express.static(path.join(__dirname, 'assets'))); // Serve static files from the 'assets' directory
 app.use(express.static(path.join(__dirname, 'content'))); // Serve static files from the 'content' directory
+app.use(express.static(path.join(__dirname, 'sites'))); // Serve static files from the 'sites' directory
 
 app.get('/', function (req, res) {
-	res.sendFile(path.join(__dirname, 'index.html'));
+	res.sendFile(path.join(__dirname, 'sites', 'index.html'));
 });
 
 // Start the server on the specified port
