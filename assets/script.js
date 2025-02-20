@@ -23,7 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
 			})
 			.catch((err) => {
 				console.error('Error loading JSON:', err);
-				fetch('/content/data.json')
+				// Fallback to github pages
+				fetch('/sinanbakim.de/content/data.json')
 					.then((response) => response.json())
 					.then((data) => {
 						pageData = data;
