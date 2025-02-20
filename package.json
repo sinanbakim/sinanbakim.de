@@ -5,7 +5,7 @@
 	"main": "index.js",
 	"scripts": {
 		"start": "node server.js",
-		"dev": "npx http-server . -p 0 -o ./public/index.html -d false --no-dotfiles -c-1"
+		"dev": "npx http-server . -p 0 -o ./index.html -d false --no-dotfiles -c-1"
 	},
 	"repository": {
 		"type": "git",

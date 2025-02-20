@@ -26,26 +26,11 @@ console.log('PORT environment variable is set to ' + process.env.PORT);
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
-app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from the 'public' directory
-
-app.use(function (req, res, next) {
-	console.log(
-		'Time:',
-		new Date().toLocaleString('de-DE', { timeZone: 'Europe/Berlin' }) + ', Request:',
-		req.method + ' ' + req.originalUrl + ', IP:',
-		req.ip,
-		', Response:',
-		res.statusCode,
-	);
-	next();
-});
-
-app.get('/test', function (req, res) {
-	res.sendFile(path.join(__dirname, 'public', 'test.html'));
-});
+app.use(express.static(path.join(__dirname, 'assets'))); // Serve static files from the 'assets' directory
+app.use(express.static(path.join(__dirname, 'content'))); // Serve static files from the 'content' directory
 
 app.get('/', function (req, res) {
-	res.send('Hello World');
+	res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // Start the server on the specified port

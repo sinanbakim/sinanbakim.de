@@ -1,6 +1,131 @@
-.*
-!.gitignore
-.env
-/node_modules
-
+# Node.js
 package-lock.json
+node_modules
+/node_modules/*
+
+# Credentials
+.env
+.npmrc
+.pnpmrc
+.npmrc.yaml
+.pnpmfile.js
+passwd
+
+# Bower
+bower_components
+
+# Logs
+.idea
+.vscode
+*.log
+*.log.*
+*.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Tests
+coverage
+
+# Build
+build/*
+build
+dist/*
+dist
+*.min.*
+
+# Temp
+.cache
+tmp
+*.tmp
+
+# Tools
+bower_components
+jspm_packages
+node_modules
+
+# composer
+vendor
+
+# angular-cli
+*.swp
+*.map
+
+# Frameworks
+.angular/*
+
+# IDE
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/tasks.json
+*.code-workspace
+*.iml
+*.ipr
+*.iws
+.idea
+.project
+.classpath
+
+# Misc ( for now )
+*.lock
+*.bak
+*.swp
+*.tmp
+*.zip
+*.tar.gz
+*.tgz
+*.rar
+*.exe
+*.msi
+
+# Large media files
+*.mp4
+*.mov
+*.avi
+*.mpg
+*.mpeg
+*.wmv
+*.mkv
+*.flv
+*.webm
+
+# Directories
+bower_components/
+node_modules/
+tmp/
+temp/
+temp-test/
+
+coverage/
+.coverage/
+.tmp/
+logs/
+*.logs/
+docs/
+doc/
+out/
+.idea/
+
+.nyc_output/
+public/
+coverage/
+.next/
+.sass-cache/
+.settings/
+
+
+# Misc
+.tmp
+.vscode/*
+*.launch
+*.sublime-workspace
+/.angular/cache
+/bazel-out
+/connect.lock
+/coverage
+/dst
+/libpeerconnection.log
+/logs
+

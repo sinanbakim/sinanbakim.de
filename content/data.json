@@ -1,0 +1,60 @@
+{
+	"articles": [
+		{
+			"id": "art1",
+			"title": "Welcome to the Dark Page",
+			"content": "This is the main article content in dark mode.",
+			"pageId": "page1"
+		},
+		{
+			"id": "art2",
+			"title": "Another Article",
+			"content": "Another article content. Click for more details.",
+			"pageId": "page1"
+		}
+	],
+	"pages": [
+		{
+			"id": "page1",
+			"title": "Detailed Information",
+			"sections": ["sec1", "sec2"]
+		}
+	],
+	"sections": [
+		{
+			"id": "sec1",
+			"title": "Section One",
+			"content": "Content for section one.",
+			"modalSections": [
+				{
+					"title": "Modal Section 1",
+					"content": "Detailed modal content for section one."
+				},
+				{
+					"title": "Modal Section 2",
+					"content": "Additional modal content for section one."
+				}
+			]
+		},
+		{
+			"id": "sec2",
+			"title": "Section Two",
+			"content": "Content for section two."
+		}
+	],
+	"pagetree": {
+		"title": "Navigation",
+		"children": [
+			{
+				"id": "art1",
+				"type": "article",
+				"title": "Welcome to the Dark Page"
+			},
+			{
+				"id": "page1",
+				"type": "page",
+				"title": "Detailed Information"
+			}
+		]
+	}
+}
