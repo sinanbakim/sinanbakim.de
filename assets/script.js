@@ -6,20 +6,43 @@ let articleMap = {};
 
 // Load JSON data and initialize the app
 document.addEventListener('DOMContentLoaded', () => {
-	fetch('/data.json')
-		.then((response) => response.json())
-		.then((data) => {
-			pageData = data;
-			// Create lookup maps for pages, sections, articles by id
-			pageData.pages.forEach((p) => (pageMap[p.id] = p));
-			pageData.sections.forEach((s) => (sectionMap[s.id] = s));
-			pageData.articles.forEach((a) => (articleMap[a.id] = a));
+	// Test if url is correct and if the fetch is working correctly with /data.json otherwise use /content/data.json
+	try {
+		fetch('/data.json')
+			.then((response) => response.json())
+			.then((data) => {
+				pageData = data;
+				// Create lookup maps for pages, sections, articles by id
+				pageData.pages.forEach((p) => (pageMap[p.id] = p));
+				pageData.sections.forEach((s) => (sectionMap[s.id] = s));
+				pageData.articles.forEach((a) => (articleMap[a.id] = a));
 
-			renderNavigation(pageData.pagetree);
-			populateArticles(pageData.articles);
-			setupContentLinks();
-		})
-		.catch((err) => console.error('Error loading JSON:', err));
+				renderNavigation(pageData.pagetree);
+				populateArticles(pageData.articles);
+				setupContentLinks();
+			})
+			.catch((err) => {
+				console.error('Error loading JSON:', err);
+				fetch('/content/data.json')
+					.then((response) => response.json())
+					.then((data) => {
+						pageData = data;
+						// Create lookup maps for pages, sections, articles by id
+						pageData.pages.forEach((p) => (pageMap[p.id] = p));
+						pageData.sections.forEach((s) => (sectionMap[s.id] = s));
+						pageData.articles.forEach((a) => (articleMap[a.id] = a));
+
+						renderNavigation(pageData.pagetree);
+						populateArticles(pageData.articles);
+						setupContentLinks();
+					})
+					.catch((err) => console.error('Error loading JSON:', err));
+
+				console.error('Both fetches failed');
+			});
+	} catch (error) {
+		console.error('Error fetching JSON:', error);
+	}
 
 	document.getElementById('modal-close').addEventListener('click', closeModal);
 	document.getElementById('modal').addEventListener('click', (e) => {
