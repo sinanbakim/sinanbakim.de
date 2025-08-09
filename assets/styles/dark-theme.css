@@ -1,0 +1,24 @@
+/* Dark theme styles - scoped to .style-dark-theme */
+.style-dark-theme {
+	background: linear-gradient(135deg, #1a1a2e, #16213e);
+	color: #eee;
+	border-radius: 8px;
+	padding: 1.5rem;
+	margin: 1rem 0;
+	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.style-dark-theme h2 {
+	color: #bb86fc;
+	text-shadow: 0 0 10px rgba(187, 134, 252, 0.3);
+}
+
+.style-dark-theme a {
+	color: #03dac6;
+	transition: all 0.3s ease;
+}
+
+.style-dark-theme a:hover {
+	color: #bb86fc;
+	text-shadow: 0 0 5px rgba(187, 134, 252, 0.5);
+}

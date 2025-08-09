@@ -1,0 +1,16 @@
+/* Simple section styles - scoped to .style-simple-section */
+.style-simple-section {
+	background: #f8f9fa;
+	color: #495057;
+	border: 1px solid #dee2e6;
+	border-radius: 6px;
+	padding: 1.5rem;
+	margin: 1rem 0;
+}
+
+.style-simple-section h3 {
+	color: #6c757d;
+	margin-top: 0;
+	border-bottom: 1px solid #dee2e6;
+	padding-bottom: 0.5rem;
+}

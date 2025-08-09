@@ -2,44 +2,113 @@
 	"articles": [
 		{
 			"id": "art1",
-			"title": "Welcome to the Dark Page",
-			"content": "This is the main article content in dark mode.",
-			"pageId": "page1"
+			"title": "Welcome to Sincap",
+			"content": "Künstler · Wissenschaftler · Entwickler aus Köln. Resonanzsysteme zwischen Kunst, Technik und Gesellschaft.",
+			"pageId": "profile",
+			"style": "dark-theme"
 		},
 		{
 			"id": "art2",
-			"title": "Another Article",
-			"content": "Another article content. Click for more details.",
-			"pageId": "page1"
+			"title": "Projekte & Frameworks",
+			"content": "Von CrossArts bis GEAR Engine - modulare Tools für die digitale Zukunft.",
+			"pageId": "projects",
+			"style": "tools-overview"
+		},
+		{
+			"id": "art3",
+			"title": "Chat → JSONL Konverter",
+			"content": "Ein Tool zum Konvertieren von Chat-Dialogen und JSON-Dateien in das JSONL-Format.",
+			"pageId": "page2",
+			"style": "tool-theme"
+		},
+		{
+			"id": "art4",
+			"title": "Weitere Tools",
+			"content": "Sammlung verschiedener nützlicher Tools und Utilities.",
+			"pageId": "page3",
+			"style": "tools-overview"
 		}
 	],
 	"pages": [
 		{
-			"id": "page1",
-			"title": "Detailed Information",
-			"sections": ["sec1", "sec2"]
+			"id": "profile",
+			"title": "Profil & Arbeitsweise",
+			"sections": ["profile-info", "work-areas"],
+			"style": "info-page"
+		},
+		{
+			"id": "projects",
+			"title": "Projekte & Frameworks",
+			"sections": ["projects-overview", "crossarts-section", "gear-section"],
+			"style": "projects-page"
+		},
+		{
+			"id": "page2",
+			"title": "Chat → JSONL Konverter Tool",
+			"sections": ["sec3"],
+			"style": "converter-page"
+		},
+		{
+			"id": "page3",
+			"title": "Tools & Utilities",
+			"sections": ["sec4", "sec5"],
+			"style": "tools-page"
 		}
 	],
 	"sections": [
 		{
-			"id": "sec1",
-			"title": "Section One",
-			"content": "Content for section one.",
-			"modalSections": [
-				{
-					"title": "Modal Section 1",
-					"content": "Detailed modal content for section one."
-				},
-				{
-					"title": "Modal Section 2",
-					"content": "Additional modal content for section one."
-				}
-			]
+			"id": "profile-info",
+			"title": "Über Sinan Bakim (Sincap)",
+			"content": "user-profile:personal",
+			"style": "profile-card",
+			"userData": true
 		},
 		{
-			"id": "sec2",
-			"title": "Section Two",
-			"content": "Content for section two."
+			"id": "work-areas",
+			"title": "Arbeitsbereiche",
+			"content": "user-profile:workAreas",
+			"style": "work-areas-grid",
+			"userData": true
+		},
+		{
+			"id": "projects-overview",
+			"title": "Ausgewählte Projekte",
+			"content": "user-profile:projects",
+			"style": "projects-grid",
+			"userData": true
+		},
+		{
+			"id": "crossarts-section",
+			"title": "CrossArts Frameworks",
+			"content": "Modulare Entwicklungstools: CAGE (Engine), CASE (Studio), CAVE (Viewport), CAST (Testing), CARD (Assets).",
+			"style": "framework-section"
+		},
+		{
+			"id": "gear-section",
+			"title": "GEAR Engine",
+			"content": "Generative Engine für prozedurale Welten. Kopplung von Physik, Musik und narrativen Systemen.",
+			"style": "engine-section"
+		},
+		{
+			"id": "sec3",
+			"title": "Chat → JSONL Konverter",
+			"content": "embedded-tool:chat2jsonl",
+			"toolType": "chat2jsonl",
+			"inline-style": true
+		},
+		{
+			"id": "sec4",
+			"title": "Text Converter Tool",
+			"content": "embedded-tool:textconverter",
+			"toolType": "textconverter",
+			"style": "converter-section"
+		},
+		{
+			"id": "sec5",
+			"title": "Another Tool",
+			"content": "embedded-tool:anothertool",
+			"toolType": "anothertool",
+			"style": "another-tool-section"
 		}
 	],
 	"pagetree": {
@@ -48,12 +117,27 @@
 			{
 				"id": "art1",
 				"type": "article",
-				"title": "Welcome to the Dark Page"
+				"title": "Sincap"
 			},
 			{
-				"id": "page1",
+				"id": "profile",
 				"type": "page",
-				"title": "Detailed Information"
+				"title": "Profil"
+			},
+			{
+				"id": "projects",
+				"type": "page",
+				"title": "Projekte"
+			},
+			{
+				"id": "art3",
+				"type": "article",
+				"title": "Chat → JSONL Konverter"
+			},
+			{
+				"id": "art4",
+				"type": "article",
+				"title": "Tools"
 			}
 		]
 	}

@@ -1,0 +1,23 @@
+/* Another tool section styles - scoped to .style-another-tool-section */
+.style-another-tool-section {
+	background: linear-gradient(45deg, #ff6b6b, #feca57);
+	color: white;
+	border-radius: 10px;
+	padding: 1.5rem;
+	margin: 1rem 0;
+	box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+}
+
+.style-another-tool-section h3 {
+	color: white;
+	margin-top: 0;
+	text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.style-another-tool-section::before {
+	content: '🔨';
+	position: absolute;
+	top: 10px;
+	right: 15px;
+	font-size: 1.3rem;
+}

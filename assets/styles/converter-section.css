@@ -1,0 +1,23 @@
+/* Converter section styles - scoped to .style-converter-section */
+.style-converter-section {
+	background: linear-gradient(135deg, #667eea, #764ba2);
+	color: white;
+	border-radius: 8px;
+	padding: 1.5rem;
+	margin: 1rem 0;
+	position: relative;
+}
+
+.style-converter-section::before {
+	content: '⚙️';
+	position: absolute;
+	top: 10px;
+	right: 15px;
+	font-size: 1.5rem;
+	opacity: 0.8;
+}
+
+.style-converter-section h3 {
+	color: white;
+	margin-top: 0;
+}

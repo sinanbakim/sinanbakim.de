@@ -1,0 +1,103 @@
+/* Projects grid styles - scoped to .style-projects-grid */
+.style-projects-grid {
+	background: #121520;
+	border-radius: 12px;
+	padding: 1.5rem;
+	margin: 1rem 0;
+	border: 1px solid #1c2030;
+}
+
+.style-projects-grid h3 {
+	color: #a48bfe;
+	margin-top: 0;
+	margin-bottom: 1.5rem;
+	font-size: 22px;
+}
+
+.style-projects-grid .projects-container {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+	gap: 1.5rem;
+}
+
+.style-projects-grid .project-card {
+	background: linear-gradient(135deg, #1c2030, #2a2f45);
+	border: 1px solid #1c2030;
+	border-radius: 12px;
+	padding: 1.5rem;
+	transition: all 0.3s ease;
+	position: relative;
+	overflow: hidden;
+}
+
+.style-projects-grid .project-card::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 3px;
+	background: linear-gradient(90deg, #7bd6ff, #a48bfe);
+	opacity: 0;
+	transition: opacity 0.3s ease;
+}
+
+.style-projects-grid .project-card:hover::before {
+	opacity: 1;
+}
+
+.style-projects-grid .project-card:hover {
+	transform: translateY(-3px);
+	box-shadow: 0 12px 35px rgba(164, 139, 254, 0.15);
+	border-color: #a48bfe;
+}
+
+.style-projects-grid .project-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 1rem;
+}
+
+.style-projects-grid .project-title {
+	color: #e6e8ef;
+	font-size: 18px;
+	font-weight: 700;
+	margin: 0;
+}
+
+.style-projects-grid .project-tag {
+	font-size: 11px;
+	border: 1px solid #1c2030;
+	padding: 4px 8px;
+	border-radius: 8px;
+	color: #a7b0c0;
+	background: rgba(164, 139, 254, 0.1);
+}
+
+.style-projects-grid .project-description {
+	color: #a7b0c0;
+	line-height: 1.6;
+	margin: 0 0 1rem 0;
+}
+
+.style-projects-grid .project-details {
+	color: #7bd6ff;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+	font-size: 13px;
+	margin: 0;
+	padding-top: 0.5rem;
+	border-top: 1px solid rgba(28, 32, 48, 0.5);
+}
+
+@media (max-width: 700px) {
+	.style-projects-grid .projects-container {
+		grid-template-columns: 1fr;
+	}
+
+	.style-projects-grid .project-header {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.5rem;
+	}
+}

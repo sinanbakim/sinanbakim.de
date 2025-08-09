@@ -1,0 +1,55 @@
+/* Work areas grid styles - scoped to .style-work-areas-grid */
+.style-work-areas-grid {
+	background: #121520;
+	border-radius: 12px;
+	padding: 1.5rem;
+	margin: 1rem 0;
+	border: 1px solid #1c2030;
+}
+
+.style-work-areas-grid h3 {
+	color: #7bd6ff;
+	margin-top: 0;
+	margin-bottom: 1rem;
+	font-size: 22px;
+}
+
+.style-work-areas-grid .work-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: 1rem;
+}
+
+.style-work-areas-grid .work-card {
+	background: linear-gradient(135deg, #1c2030, #2a2f45);
+	border: 1px solid #1c2030;
+	border-radius: 12px;
+	padding: 1.5rem;
+	transition: all 0.3s ease;
+}
+
+.style-work-areas-grid .work-card:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 8px 25px rgba(123, 214, 255, 0.1);
+	border-color: #7bd6ff;
+}
+
+.style-work-areas-grid .work-card h4 {
+	color: #7bd6ff;
+	margin: 0 0 0.5rem 0;
+	font-size: 16px;
+	font-weight: 600;
+}
+
+.style-work-areas-grid .work-card p {
+	color: #a7b0c0;
+	margin: 0;
+	line-height: 1.5;
+	font-size: 14px;
+}
+
+@media (max-width: 600px) {
+	.style-work-areas-grid .work-grid {
+		grid-template-columns: 1fr;
+	}
+}

@@ -1,0 +1,26 @@
+/* Light theme styles - scoped to .style-light-theme */
+.style-light-theme {
+	background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+	color: #212529;
+	border-radius: 8px;
+	padding: 1.5rem;
+	margin: 1rem 0;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+	border: 1px solid #dee2e6;
+}
+
+.style-light-theme h2 {
+	color: #495057;
+	border-bottom: 2px solid #007bff;
+	padding-bottom: 0.5rem;
+}
+
+.style-light-theme a {
+	color: #007bff;
+	transition: all 0.3s ease;
+}
+
+.style-light-theme a:hover {
+	color: #0056b3;
+	text-decoration: underline;
+}

@@ -1,0 +1,43 @@
+/* Tool theme styles - scoped to .style-tool-theme */
+.style-tool-theme {
+	background: linear-gradient(45deg, #2d3748, #4a5568);
+	border-left: 4px solid #38b2ac;
+	padding: 1.5rem;
+	border-radius: 6px;
+	position: relative;
+}
+
+.style-tool-theme::before {
+	content: '🔧';
+	position: absolute;
+	top: 10px;
+	right: 15px;
+	font-size: 1.2rem;
+	opacity: 0.7;
+}
+
+.style-tool-theme h2 {
+	color: #38b2ac;
+	margin-top: 0;
+}
+
+.style-tool-theme p {
+	color: #e2e8f0;
+	line-height: 1.6;
+}
+
+.style-tool-theme a {
+	background: #38b2ac;
+	color: white;
+	padding: 0.5rem 1rem;
+	border-radius: 4px;
+	text-decoration: none;
+	display: inline-block;
+	margin-top: 1rem;
+	transition: background-color 0.3s ease;
+}
+
+.style-tool-theme a:hover {
+	background: #319795;
+	transform: translateY(-1px);
+}

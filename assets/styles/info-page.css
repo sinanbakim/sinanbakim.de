@@ -1,0 +1,15 @@
+/* Info page styles - scoped to .style-info-page */
+.style-info-page {
+	background: linear-gradient(135deg, #667eea, #764ba2);
+	padding: 2rem;
+	border-radius: 10px;
+	margin: 1rem 0;
+	box-shadow: 0 6px 20px rgba(102, 126, 234, 0.2);
+}
+
+.style-info-page h1,
+.style-info-page h2,
+.style-info-page h3 {
+	color: white;
+	text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}

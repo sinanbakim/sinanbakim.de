@@ -1,0 +1,15 @@
+/* Tools page styles - scoped to .style-tools-page */
+.style-tools-page {
+	background: linear-gradient(45deg, #fc466b, #3f5efb);
+	padding: 2rem;
+	border-radius: 12px;
+	margin: 1rem 0;
+	color: white;
+}
+
+.style-tools-page h1,
+.style-tools-page h2,
+.style-tools-page h3 {
+	color: white;
+	text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}

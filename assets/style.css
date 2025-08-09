@@ -89,3 +89,64 @@ section {
 	cursor: pointer;
 	font-size: 1.5rem;
 }
+
+/* Embedded tool styling */
+.embedded-tool {
+	background: #1e1e1e;
+	padding: 1rem;
+	border-radius: 5px;
+	margin-top: 1rem;
+}
+
+.embedded-tool[data-tool-type] {
+	/* Special styling for tools with inline styles */
+	border: 2px solid #333;
+	position: relative;
+}
+
+.embedded-tool[data-tool-type]::before {
+	content: 'Inline Styled Tool';
+	position: absolute;
+	top: -10px;
+	right: 10px;
+	background: #333;
+	color: #bb86fc;
+	padding: 2px 8px;
+	font-size: 0.8rem;
+	border-radius: 3px;
+}
+
+.embedded-tool h1 {
+	margin-top: 0;
+	color: #bb86fc;
+}
+
+.embedded-tool textarea {
+	background: #2d2d2d;
+	color: #e0e0e0;
+	border: 1px solid #555;
+}
+
+.embedded-tool pre {
+	background: #2d2d2d;
+	color: #e0e0e0;
+	border: 1px solid #555;
+}
+
+.embedded-tool button {
+	background: #bb86fc;
+	color: #121212;
+}
+
+.embedded-tool input[type='file'] {
+	color: #e0e0e0;
+}
+
+.embedded-tool label {
+	color: #e0e0e0;
+}
+
+/* Page wrapper for better organization */
+.page-wrapper {
+	width: 100%;
+}

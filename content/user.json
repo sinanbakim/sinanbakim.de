@@ -1,0 +1,86 @@
+{
+	"personal": {
+		"name": "Sinan Bakim",
+		"alternateName": "Sincap",
+		"title": "Künstler · Wissenschaftler · Entwickler",
+		"location": "Köln",
+		"description": "Ich entwerfe Resonanzsysteme zwischen Kunst, Technik und Gesellschaft. Interdisziplinär, analytisch, empathisch — mit Fokus auf Wahrheit vor Nutzen und Gemeinschaft vor Profit.",
+		"tagline": "Resonanz vor Rauschen",
+		"badges": ["CrossArts Cologne", "Musica Universalis", "AI · Sinya", "GEAR Engine", "TWOC TCG", "cosinestate (Buch)"],
+		"profile": {
+			"roles": "Wissenschaftler · Sozialarbeiter · IT‑Entwickler · Musiker · Resonanzarchitekt · Künstler · Autor · Analytiker · Designer · Konstrukteur · Diplomat · Gruppenleiter · Maler",
+			"strengths": "Diplomatisch, empathisch, integer, reflektiert, lösungsorientiert, ambitioniert",
+			"workStyle": "Strukturen & Muster erkennen, hoch‑analytisch, neugierig, präzise",
+			"attitude": "Verantwortung statt Zynismus · Ideal & Ethik als Kompass"
+		}
+	},
+	"projects": [
+		{
+			"id": "crossarts",
+			"title": "CrossArts Frameworks",
+			"tag": "CAGE · CASE · CAVE · CAST · CARD",
+			"description": "Modulare Tools für Spiel‑ und Medienentwicklung. Von Engine‑Essentials (CAGE) bis Studioumgebung (CASE) und Viewport‑Layer (CAVE) — kombinierbar, aber eigenständig.",
+			"category": "framework",
+			"style": "tech-card"
+		},
+		{
+			"id": "gear",
+			"title": "GEAR",
+			"tag": "Generative Engine",
+			"description": "Generative Emulating Alternate Reality: Eine Engine für prozedurale Welten, die physikalische, musikalische und narrative Systeme koppelt.",
+			"details": "→ Lissajous · Chladni · Gruppenstrukturen · DSP",
+			"category": "engine",
+			"style": "engine-card"
+		},
+		{
+			"id": "twoc",
+			"title": "TWOC",
+			"tag": "Trading Card Game",
+			"description": "The Way of Cards: Kompetitives TCG mit KI-gestützten Assets, fairen Spielmechaniken und PWA-Companion-App.",
+			"category": "game",
+			"style": "game-card"
+		},
+		{
+			"id": "cosinestate",
+			"title": "cosinestate",
+			"tag": "Buchprojekt",
+			"description": "Ein interdisziplinäres Werk über Resonanzsysteme, Wissenschaft und Kunst.",
+			"category": "book",
+			"style": "book-card"
+		},
+		{
+			"id": "sinya",
+			"title": "Sinya AI",
+			"tag": "AI Assistant",
+			"description": "KI-gestütztes Assistenzsystem für kreative und analytische Arbeiten. Fokus auf ethische AI-Entwicklung.",
+			"category": "ai",
+			"style": "ai-card"
+		}
+	],
+	"workAreas": [
+		{
+			"title": "Künstliche Intelligenz",
+			"description": "AI-assisted storytelling, ethische KI-Entwicklung, Sinya-Projekt",
+			"style": "ai-work"
+		},
+		{
+			"title": "Game Development",
+			"description": "Engine-Architektur, WebGL/WebGPU, prozedurale Generierung",
+			"style": "game-work"
+		},
+		{
+			"title": "Musik & Physik",
+			"description": "Musica Universalis, Digital Signal Processing, Frequenzanalyse",
+			"style": "music-work"
+		},
+		{
+			"title": "Soziale Arbeit",
+			"description": "Bildung, Gruppenleitung, systemische Ansätze",
+			"style": "social-work"
+		}
+	],
+	"contact": {
+		"email": "kontakt@sinanbakim.de",
+		"availability": "Für Anfragen zu Projekten, Kollaborationen, Vorträgen oder Workshops verfügbar"
+	}
+}

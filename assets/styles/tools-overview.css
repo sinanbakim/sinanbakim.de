@@ -1,0 +1,49 @@
+/* Tools overview styles - scoped to .style-tools-overview */
+.style-tools-overview {
+	background: linear-gradient(45deg, #667eea, #764ba2);
+	color: white;
+	border-radius: 12px;
+	padding: 2rem;
+	margin: 1rem 0;
+	box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+	position: relative;
+	overflow: hidden;
+}
+
+.style-tools-overview::before {
+	content: '🛠️';
+	position: absolute;
+	top: 15px;
+	right: 20px;
+	font-size: 2rem;
+	opacity: 0.7;
+}
+
+.style-tools-overview h2 {
+	color: #ffffff;
+	margin-top: 0;
+	text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.style-tools-overview p {
+	color: #f8f9ff;
+	line-height: 1.7;
+}
+
+.style-tools-overview a {
+	background: rgba(255, 255, 255, 0.2);
+	color: white;
+	padding: 0.7rem 1.5rem;
+	border-radius: 25px;
+	text-decoration: none;
+	display: inline-block;
+	margin-top: 1rem;
+	transition: all 0.3s ease;
+	backdrop-filter: blur(10px);
+}
+
+.style-tools-overview a:hover {
+	background: rgba(255, 255, 255, 0.3);
+	transform: translateY(-2px);
+	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}

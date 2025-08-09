@@ -1,0 +1,15 @@
+/* Converter page styles - scoped to .style-converter-page */
+.style-converter-page {
+	background: linear-gradient(135deg, #2d3748, #4a5568);
+	padding: 2rem;
+	border-radius: 8px;
+	margin: 1rem 0;
+	border-left: 5px solid #38b2ac;
+}
+
+.style-converter-page h1,
+.style-converter-page h2,
+.style-converter-page h3 {
+	color: #38b2ac;
+	margin-top: 0;
+}

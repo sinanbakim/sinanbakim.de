@@ -1,0 +1,26 @@
+/* Projects page styles - scoped to .style-projects-page */
+.style-projects-page {
+	background: linear-gradient(45deg, #2d3748, #4a5568);
+	padding: 2rem;
+	border-radius: 12px;
+	margin: 1rem 0;
+	color: #e6e8ef;
+	border: 1px solid #1c2030;
+}
+
+.style-projects-page h1,
+.style-projects-page h2,
+.style-projects-page h3 {
+	color: #7bd6ff;
+	text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.style-projects-page h1 {
+	font-size: clamp(24px, 4vw, 32px);
+	margin-top: 0;
+}
+
+.style-projects-page p {
+	color: #e2e8f0;
+	line-height: 1.6;
+}

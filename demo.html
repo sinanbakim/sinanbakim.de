@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sinan Bakim — Sincap | Künstler · Wissenschaftler · Entwickler</title>
+  <meta name="description" content="Sinan Bakim (Sincap): Künstler, Wissenschaftler, Entwickler. CrossArts Cologne, Musica Universalis, cosinestate, GEAR, TWOC, Sinya.">
+  <meta name="author" content="Sinan Bakim">
+  <meta property="og:title" content="Sinan Bakim — Sincap">
+  <meta property="og:description" content="Künstler · Wissenschaftler · Entwickler — CrossArts, cosinestate, TWOC, Sinya">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="de_DE">
+  <meta name="theme-color" content="#0b0d12">
+
+  <style>
+    :root{
+      --bg:#0b0d12; --fg:#e6e8ef; --muted:#a7b0c0; --accent:#7bd6ff; --accent-2:#a48bfe;
+      --card:#121520; --line:#1c2030; --ok:#75e0a7; --warn:#ffd166;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"}
+    a{color:var(--accent)}
+    .wrap{display:grid;grid-template-rows:auto 1fr auto;min-height:100%}
+    header{position:sticky;top:0;background:rgba(11,13,18,.8);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);z-index:2}
+    nav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 18px;max-width:1100px;margin:0 auto}
+    nav .brand{display:flex;gap:10px;align-items:center;font-weight:700;letter-spacing:.3px}
+    nav .brand .dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-2));box-shadow:0 0 18px var(--accent)}
+    nav a.btn{border:1px solid var(--line);padding:8px 12px;border-radius:10px;text-decoration:none}
+    .grid{max-width:1100px;margin:0 auto;padding:18px}
+    .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:22px;padding:24px 0}
+    .hero .card{background:var(--card);border:1px solid var(--line);padding:22px;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.25)}
+    h1{font-size:clamp(28px,5vw,44px);line-height:1.1;margin:.2em 0}
+    h2{font-size:clamp(22px,3.6vw,28px);margin:1.4em 0 .6em}
+    h3{font-size:18px;margin:1em 0 .5em;color:var(--muted)}
+    .badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .badge{font-size:12px;padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.02)}
+    .kicker{color:var(--muted);text-transform:uppercase;letter-spacing:.2em;font-size:12px}
+    .lead{font-size:18px;color:#f1f4ff}
+    .section{margin-top:24px;display:grid;gap:16px}
+    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+    .card{background:var(--card);border:1px solid var(--line);padding:18px;border-radius:16px}
+    .card .title{display:flex;justify-content:space-between;align-items:center}
+    .tag{font-size:12px;border:1px solid var(--line);padding:4px 8px;border-radius:8px;color:var(--muted)}
+    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace}
+    footer{border-top:1px solid var(--line);padding:18px;color:var(--muted)}
+    .cols{columns:2;column-gap:24px}
+    @media (max-width:860px){
+      .hero{grid-template-columns:1fr}
+      .cols{columns:1}
+    }
+    .toggle{cursor:pointer}
+    .hidden{display:none}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:#10131d}
+    .list-clean{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+    .kv{display:grid;grid-template-columns:140px 1fr;gap:8px;margin-top:8px}
+    .kv span{color:var(--muted)}
+    .sr{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
+  </style>
+  <script type="application/ld+json">
+  {"@context": "https://schema.org", "@type": "Person", "name": "Sinan Bakim", "alternateName": "Sincap", "jobTitle": "Künstler · Wissenschaftler · Entwickler", "worksFor": {"@type": "Organization", "name": "CrossArts Cologne"}, "knowsAbout": ["AI-assisted storytelling", "Game engine architecture", "Musica Universalis", "Digital signal processing", "WebGL/WebGPU", "Education & Social Work"], "address": {"@type": "PostalAddress", "addressLocality": "Köln", "addressCountry": "DE"}, "url": "https://example.com/", "sameAs": [], "dateModified": "2025-08-09T01:11:22Z"}
+  </script>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <nav>
+      <div class="brand">
+        <div class="dot" aria-hidden="true"></div>
+        <div>Sincap</div>
+      </div>
+      <div class="actions">
+        <a class="btn toggle" onclick="toggleMode()" aria-label="Theme umschalten">☾/☀︎</a>
+        <a class="btn" href="#kontakt">Kontakt</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="grid">
+    <section class="hero" id="home">
+      <div class="card">
+        <div class="kicker">Sinan Bakim · Köln</div>
+        <h1>Künstler · Wissenschaftler · Entwickler</h1>
+        <p class="lead">Ich entwerfe <strong>Resonanzsysteme</strong> zwischen Kunst, Technik und Gesellschaft. Interdisziplinär, analytisch, empathisch — mit Fokus auf <em>Wahrheit vor Nutzen</em> und <em>Gemeinschaft vor Profit</em>.</p>
+        <div class="badges">
+          <span class="badge">CrossArts Cologne</span>
+          <span class="badge">Musica Universalis</span>
+          <span class="badge">AI · Sinya</span>
+          <span class="badge">GEAR Engine</span>
+          <span class="badge">TWOC TCG</span>
+          <span class="badge">cosinestate (Buch)</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Profil</h3>
+        <div class="kv">
+          <span>Rollen</span><div>Wissenschaftler · Sozialarbeiter · IT‑Entwickler · Musiker · Resonanzarchitekt · Künstler · Autor · Analytiker · Designer · Konstrukteur · Diplomat · Gruppenleiter · Maler</div>
+          <span>Stärken</span><div>Diplomatisch, empathisch, integer, reflektiert, lösungsorientiert, ambitioniert</div>
+          <span>Arbeitsweise</span><div>Strukturen & Muster erkennen, hoch‑analytisch, neugierig, präzise</div>
+          <span>Haltung</span><div>Verantwortung statt Zynismus · Ideal & Ethik als Kompass</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="projekte">
+      <h2>Ausgewählte Projekte</h2>
+      <div class="cards">
+        <article class="card">
+          <div class="title"><strong>CrossArts Frameworks</strong><span class="tag">CAGE · CASE · CAVE · CAST · CARD</span></div>
+          <p>Modulare Tools für Spiel‑ und Medienentwicklung. Von Engine‑Essentials (CAGE) bis Studioumgebung (CASE) und Viewport‑Layer (CAVE) — kombinierbar, aber eigenständig.</p>
+          <ul class="list-clean">
+            <li>• WebGPU/WebGL, WebRTC, modulare Architektur</li>
+            <li>• Fokus: Skalierbarkeit, Interoperabilität, Education</li>
+          </ul>
+        </article>
+        <article class="card">
+          <div class="title"><strong>GEAR</strong><span class="tag">Generative Engine</span></div>
+          <p>Generative Emulating Alternate Reality: Eine Engine für prozedurale Welten, die physikalische, musikalische und narrative Systeme koppelt.</p>
+          <p class="mono">→ Lissajous · Chladni · Gruppenstrukturen · DSP</p>
+        </article>
+        <article class="card">
+          <div class="title"><strong>TWOC</strong><span class="tag">Trading Card Game</span></div>
+          <p>„The Way of Cards“: Kompetitives TCG mit KI‑gestützten Assets, fairen Spielmechaniken und PWA‑Companion‑App.</p>
+        </article>
+        <article class="card">
+          <div class="title"><strong>cosinestate</strong><span class="tag">Buchprojekt</span></div>
+          <p>130+ Kapitel über Identität, Resonanz, KI, Gesellschaft. Symbolische Struktur (Dreamspell‑inspiriert), wissenschaftlich fundiert, mit interaktiven Visuals.</p>
+        </article>
+        <article class="card">
+          <div class="title"><strong>Sinya</strong><span class="tag">Reflexions‑KI</span></div>
+          <p>Eine dialogische KI als Spiegel für Kognition & Kreativität — mit klarer Ethik, Transparenz und Meta‑Ebenen fürs Lernen.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="arbeiten">
+      <h2>Arbeit & Themen</h2>
+      <div class="cols">
+        <div class="card">
+          <h3>Musica Universalis</h3>
+          <p>Mapping von Klang auf Physik & Mathematik. Lissajous‑Figuren, Chladni‑Muster und gruppentheoretische Strukturen als Schnittstelle zwischen Hören und Sehen.</p>
+        </div>
+        <div class="card">
+          <h3>Sozial‑Tech</h3>
+          <p>Werkzeuge, die Menschen stärken: Bildung, Zugänglichkeit, Datenschutz. Technologie als Infrastruktur für Gemeinschaft.</p>
+        </div>
+        <div class="card">
+          <h3>Architektur & Ethik</h3>
+          <p>Systemdesign mit Verantwortung: robuste Defaults, Off‑Ramps, Erklärbarkeit, Rechte der Nutzer:innen.</p>
+        </div>
+        <div class="card">
+          <h3>Lehre & Mentoring</h3>
+          <p>Workshops, Open‑Source‑Kits und Curricula — Wissen als Resonanznetz statt als Gatekeeping.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="kontakt">
+      <h2>Kontakt</h2>
+      <div class="card">
+        <p>Für Anfragen zu Projekten, Kollaborationen, Vorträgen oder Workshops:</p>
+        <ul class="list-clean">
+          <li><strong>E‑Mail:</strong> <a href="mailto:hello@example.com">hello@example.com</a> <span class="tag">Platzhalter</span></li>
+          <li><strong>Ort:</strong> Köln, Deutschland</li>
+          <li><strong>Sprachen:</strong> Deutsch, Englisch, Türkisch</li>
+        </ul>
+        <details style="margin-top:12px;">
+          <summary class="pill">Impressum & Datenschutz (Minimal)</summary>
+          <div style="margin-top:10px">
+            <p>Diese persönliche Webseite sammelt keine Cookies, keine Tracker und setzt keine externen Skripte ein.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <footer class="grid">
+    <div>© 2025 Sinan Bakim · „Resonanz vor Rauschen“</div>
+    <div style="font-size:12px">Static • DSGVO‑freundlich • Single‑File</div>
+  </footer>
+</div>
+
+<script>
+  // Simple theme toggle with localStorage
+  function toggleMode(){
+    const k='sincap-theme';
+    const cur = document.documentElement.dataset.theme || 'dark';
+    const next = cur==='dark' ? 'light':'dark';
+    document.documentElement.dataset.theme = next;
+    localStorage.setItem(k,next);
+    if(next==='light'){
+      document.documentElement.style.setProperty('--bg','#f6f7fb');
+      document.documentElement.style.setProperty('--fg','#0b0d12');
+      document.documentElement.style.setProperty('--card','#ffffff');
+      document.documentElement.style.setProperty('--line','#e6e8ef');
+      document.documentElement.style.setProperty('--muted','#556070');
+    } else {
+      document.documentElement.style.setProperty('--bg','#0b0d12');
+      document.documentElement.style.setProperty('--fg','#e6e8ef');
+      document.documentElement.style.setProperty('--card','#121520');
+      document.documentElement.style.setProperty('--line','#1c2030');
+      document.documentElement.style.setProperty('--muted','#a7b0c0');
+    }
+  }
+  (function init(){
+    const saved = localStorage.getItem('sincap-theme');
+    if(saved){
+      document.documentElement.dataset.theme = saved;
+      if(saved==='light') toggleMode();
+    }
+  })();
+</script>
+</body>
+</html>

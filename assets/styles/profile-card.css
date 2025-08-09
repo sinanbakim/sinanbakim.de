@@ -1,0 +1,85 @@
+/* Profile card styles inspired by demo.html - scoped to .style-profile-card */
+.style-profile-card {
+	background: linear-gradient(135deg, #121520, #1c2030);
+	color: #e6e8ef;
+	border-radius: 16px;
+	padding: 2rem;
+	margin: 1rem 0;
+	border: 1px solid #1c2030;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+}
+
+.style-profile-card .hero-content {
+	display: grid;
+	grid-template-columns: 1.2fr 0.8fr;
+	gap: 2rem;
+	align-items: start;
+}
+
+.style-profile-card .main-info h1 {
+	font-size: clamp(28px, 5vw, 44px);
+	line-height: 1.1;
+	margin: 0.2em 0;
+	color: #e6e8ef;
+}
+
+.style-profile-card .kicker {
+	color: #a7b0c0;
+	text-transform: uppercase;
+	letter-spacing: 0.2em;
+	font-size: 12px;
+	margin-bottom: 0.5rem;
+}
+
+.style-profile-card .lead {
+	font-size: 18px;
+	color: #f1f4ff;
+	line-height: 1.6;
+	margin: 1rem 0;
+}
+
+.style-profile-card .badges {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 1rem;
+}
+
+.style-profile-card .badge {
+	font-size: 12px;
+	padding: 6px 10px;
+	border: 1px solid #1c2030;
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.02);
+	color: #a7b0c0;
+}
+
+.style-profile-card .profile-details h3 {
+	color: #a7b0c0;
+	margin: 1em 0 0.5em;
+	font-size: 18px;
+}
+
+.style-profile-card .kv {
+	display: grid;
+	grid-template-columns: 140px 1fr;
+	gap: 8px;
+	margin-top: 8px;
+}
+
+.style-profile-card .kv span {
+	color: #a7b0c0;
+	font-weight: 500;
+}
+
+.style-profile-card .kv div {
+	color: #e6e8ef;
+	line-height: 1.5;
+}
+
+@media (max-width: 860px) {
+	.style-profile-card .hero-content {
+		grid-template-columns: 1fr;
+		gap: 1.5rem;
+	}
+}

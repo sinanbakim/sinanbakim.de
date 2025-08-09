@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="de">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Chat → JSONL Konverter</title>
+		<style>
+			body {
+				font-family: sans-serif;
+				padding: 2em;
+				background: #f6f6f6;
+			}
+			textarea {
+				width: 100%;
+				height: 200px;
+				font-family: monospace;
+			}
+			pre {
+				background: #fff;
+				padding: 1em;
+				white-space: pre-wrap;
+				border: 1px solid #ccc;
+			}
+			button {
+				padding: 0.5em 1em;
+				margin-top: 1em;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Chat/JSON/JSONL → JSONL Konverter & Tools</h1>
+
+		<div style="margin-bottom: 2em">
+			<label>
+				<input type="radio" name="mode" value="chat" checked onchange="switchMode()" />
+				Chat-Format
+			</label>
+			<label style="margin-left: 1em">
+				<input type="radio" name="mode" value="json" onchange="switchMode()" />
+				JSON-Format
+			</label>
+			<label style="margin-left: 1em">
+				<input type="radio" name="mode" value="merge" onchange="switchMode()" />
+				JSONL Merge
+			</label>
+			<label style="margin-left: 1em">
+				<input type="radio" name="mode" value="index" onchange="switchMode()" />
+				Index erstellen
+			</label>
+		</div>
+
+		<div id="chatMode">
+			<p>
+				Füge deinen Dialog hier ein (z. B.
+				<code>Du:</code>
+				und
+				<code>Sinya:</code>
+				)
+			</p>
+			<textarea id="chatInput" placeholder="Du: ...&#10;Sinya: ..."></textarea>
+			<button onclick="convertChat()">Chat → JSONL konvertieren</button>
+		</div>
+
+		<div id="jsonMode" style="display: none">
+			<p>Wähle eine JSON-Datei zum Upload oder füge JSON-Text ein:</p>
+			<div style="margin-bottom: 1em">
+				<input type="file" id="jsonFile" accept=".json" onchange="handleFileUpload()" />
+				<small style="display: block; margin-top: 0.5em; color: #666">Datei wird lokal im Browser verarbeitet - kein Upload zu einem Server!</small>
+			</div>
+			<p>
+				<strong>Oder</strong>
+				füge JSON-Text manuell ein:
+			</p>
+			<textarea id="jsonInput" placeholder='{"key": "value", "array": [...]}'></textarea>
+			<button onclick="convertJson()">JSON → JSONL konvertieren</button>
+		</div>
+
+		<div id="mergeMode" style="display: none">
+			<p>Wähle mehrere JSONL-Dateien zum Zusammenführen:</p>
+			<div style="margin-bottom: 1em">
+				<input type="file" id="jsonlFiles" accept=".jsonl" multiple onchange="handleJsonlUpload()" />
+				<small style="display: block; margin-top: 0.5em; color: #666">Mehrere Dateien auswählen mit Strg+Klick</small>
+			</div>
+			<div style="margin-bottom: 1em">
+				<label>
+					<input type="radio" name="mergeStrategy" value="keep_all" checked />
+					Alle Einträge behalten (auch doppelte Titel)
+				</label>
+				<br />
+				<label>
+					<input type="radio" name="mergeStrategy" value="merge_titles" />
+					Gleiche Titel - längeren Eintrag behalten
+				</label>
+				<br />
+				<label>
+					<input type="radio" name="mergeStrategy" value="deduplicate" />
+					Duplikate entfernen (erste Datei hat Vorrang)
+				</label>
+			</div>
+			<button onclick="mergeJsonlFiles()">JSONL-Dateien zusammenführen</button>
+		</div>
+
+		<div id="indexMode" style="display: none">
+			<p>Wähle JSONL-Dateien aus, um einen Index zu erstellen:</p>
+			<div style="margin-bottom: 1em">
+				<input type="file" id="indexFiles" accept=".jsonl" multiple onchange="handleIndexUpload()" />
+				<small style="display: block; margin-top: 0.5em; color: #666">Mehrere JSONL-Dateien auswählen mit Strg+Klick</small>
+			</div>
+			<div style="margin-bottom: 1em">
+				<label>
+					<input type="checkbox" id="autoTags" checked />
+					Automatische Tags aus Inhalt extrahieren
+				</label>
+				<br />
+				<label>
+					<input type="checkbox" id="autoSummary" checked />
+					Automatische Zusammenfassungen erstellen
+				</label>
+				<br />
+				<label>
+					<input type="checkbox" id="includeContent" />
+					Vollständigen Inhalt in Index einbetten
+				</label>
+			</div>
+			<button onclick="createIndex()">Index erstellen</button>
+		</div>
+
+		<h3>Ergebnis (.jsonl):</h3>
+		<div style="margin-bottom: 1em">
+			<button id="downloadBtn" onclick="downloadResult()" style="display: none">Als .jsonl-Datei herunterladen</button>
+		</div>
+		<pre id="output"></pre>
+
+		<script>
+			function switchMode() {
+				const chatMode = document.getElementById('chatMode');
+				const jsonMode = document.getElementById('jsonMode');
+				const mergeMode = document.getElementById('mergeMode');
+				const indexMode = document.getElementById('indexMode');
+				const selectedMode = document.querySelector('input[name="mode"]:checked').value;
+
+				// Hide all modes
+				chatMode.style.display = 'none';
+				jsonMode.style.display = 'none';
+				mergeMode.style.display = 'none';
+				indexMode.style.display = 'none';
+
+				// Show selected mode
+				if (selectedMode === 'chat') {
+					chatMode.style.display = 'block';
+				} else if (selectedMode === 'json') {
+					jsonMode.style.display = 'block';
+				} else if (selectedMode === 'merge') {
+					mergeMode.style.display = 'block';
+				} else if (selectedMode === 'index') {
+					indexMode.style.display = 'block';
+				}
+
+				// Clear output when switching modes
+				document.getElementById('output').textContent = '';
+				document.getElementById('downloadBtn').style.display = 'none';
+				window.convertedData = null;
+			}
+
+			function convertChat() {
+				const input = document.getElementById('chatInput').value;
+				const lines = input.split('\n');
+				const roleMap = { 'du': 'user', 'ich': 'user', 'sinya': 'assistant', 'chatgpt': 'assistant' };
+
+				let output = '';
+				for (const line of lines) {
+					if (!line.includes(':')) continue;
+					const [rawRole, ...rest] = line.split(':');
+					const content = rest.join(':').trim();
+					const role = roleMap[rawRole.trim().toLowerCase()] || 'system';
+					const json = JSON.stringify({ role, content }, null, 0);
+					output += json + '\n';
+				}
+
+				if (output.trim()) {
+					// For chat conversion, show preview if small, otherwise just enable download
+					if (output.length < 10000) {
+						// Show preview for small files (< 10KB)
+						document.getElementById('output').textContent = output.trim();
+						window.convertedData = null; // Use display for small files
+					} else {
+						document.getElementById('output').textContent = `✅ Chat konvertiert! ${lines.length} Zeilen verarbeitet.\nDatei ist bereit zum Download (${
+							Math.round((output.length / 1024) * 100) / 100
+						} KB)`;
+						window.convertedData = output.trim(); // Store for large files
+					}
+					document.getElementById('downloadBtn').style.display = 'inline-block';
+				} else {
+					document.getElementById('output').textContent = 'Keine Chat-Nachrichten gefunden.';
+					document.getElementById('downloadBtn').style.display = 'none';
+					window.convertedData = null;
+				}
+			}
+
+			function handleFileUpload() {
+				const fileInput = document.getElementById('jsonFile');
+				const file = fileInput.files[0];
+
+				if (!file) return;
+
+				// Show loading message
+				document.getElementById('output').textContent = 'Datei wird gelesen... Bitte warten.';
+
+				const reader = new FileReader();
+				reader.onload = function (e) {
+					try {
+						document.getElementById('output').textContent = 'JSON wird verarbeitet... Bitte warten.';
+
+						// Use setTimeout to allow UI to update
+						setTimeout(() => {
+							try {
+								const jsonText = e.target.result;
+								document.getElementById('output').textContent = 'JSON wird geparst... Bitte warten.';
+
+								// Give browser time to update UI before parsing
+								setTimeout(() => {
+									try {
+										const parsed = JSON.parse(jsonText);
+										processJsonData(parsed);
+									} catch (parseError) {
+										document.getElementById('output').textContent = 'Fehler beim Parsen des JSON: ' + parseError.message;
+									}
+								}, 200);
+							} catch (error) {
+								document.getElementById('output').textContent = 'Fehler beim Verarbeiten der Datei: ' + error.message;
+							}
+						}, 200);
+					} catch (error) {
+						document.getElementById('output').textContent = 'Fehler beim Lesen der Datei: ' + error.message;
+					}
+				};
+
+				reader.onerror = function () {
+					document.getElementById('output').textContent = 'Fehler beim Lesen der Datei.';
+				};
+
+				reader.readAsText(file);
+			}
+
+			function processJsonData(parsed) {
+				let output = '';
+				let processedCount = 0;
+				let allObjects = [];
+
+				// First, collect all objects that need to be processed
+				function collectObjects(value, objects = []) {
+					if (Array.isArray(value)) {
+						value.forEach((item) => {
+							if (typeof item === 'object' && item !== null) {
+								objects.push(item);
+							}
+						});
+					} else if (typeof value === 'object' && value !== null) {
+						objects.push(value);
+
+						// Also recursively collect from nested arrays
+						Object.values(value).forEach((nestedValue) => {
+							if (Array.isArray(nestedValue)) {
+								collectObjects(nestedValue, objects);
+							}
+						});
+					}
+					return objects;
+				}
+
+				allObjects = collectObjects(parsed);
+				const totalObjects = allObjects.length;
+
+				document.getElementById('output').textContent = `Gefunden: ${totalObjects} Objekte. Konvertierung startet...`;
+
+				// Process objects in chunks to prevent browser freezing
+				function processChunk(startIndex) {
+					const chunkSize = 100; // Process 100 objects at a time
+					const endIndex = Math.min(startIndex + chunkSize, allObjects.length);
+
+					for (let i = startIndex; i < endIndex; i++) {
+						output += JSON.stringify(allObjects[i]) + '\n';
+						processedCount++;
+					}
+
+					// Update progress
+					const progress = Math.round((processedCount / totalObjects) * 100);
+					document.getElementById('output').textContent = `Verarbeitet: ${processedCount}/${totalObjects} Objekte (${progress}%)...`;
+
+					if (endIndex < allObjects.length) {
+						// Continue with next chunk after a longer delay
+						setTimeout(() => processChunk(endIndex), 50);
+					} else {
+						// Processing complete - don't display the output, just enable download
+						if (output.trim()) {
+							document.getElementById(
+								'output',
+							).textContent = `✅ Konvertierung abgeschlossen! ${processedCount} Objekte verarbeitet.\nDatei ist bereit zum Download (${
+								Math.round((output.length / 1024 / 1024) * 100) / 100
+							} MB)`;
+							document.getElementById('downloadBtn').style.display = 'inline-block';
+							// Store output for download without displaying it
+							window.convertedData = output.trim();
+							console.log(`Konvertierung abgeschlossen: ${processedCount} Objekte verarbeitet`);
+						} else {
+							document.getElementById('output').textContent = 'Keine Objekte zur Konvertierung gefunden.';
+							document.getElementById('downloadBtn').style.display = 'none';
+						}
+					}
+				}
+
+				// Start processing
+				if (totalObjects > 0) {
+					setTimeout(() => processChunk(0), 100);
+				} else {
+					document.getElementById('output').textContent = 'Keine Objekte zur Konvertierung gefunden.';
+					document.getElementById('downloadBtn').style.display = 'none';
+				}
+			}
+
+			function convertJson() {
+				const input = document.getElementById('jsonInput').value.trim();
+
+				if (!input) {
+					document.getElementById('output').textContent = 'Bitte fügen Sie JSON-Daten ein oder wählen Sie eine Datei.';
+					return;
+				}
+
+				try {
+					const parsed = JSON.parse(input);
+					processJsonData(parsed);
+				} catch (error) {
+					document.getElementById('output').textContent = 'Fehler beim Parsen des JSON: ' + error.message;
+				}
+			}
+
+			function downloadResult() {
+				// Try to get data from window.convertedData first (for large files)
+				let output = window.convertedData || document.getElementById('output').textContent;
+
+				if (!output || output.includes('Fehler') || output.includes('Keine Objekte') || output.includes('Konvertierung abgeschlossen')) {
+					// If it's a success message, use the stored data
+					if (window.convertedData) {
+						output = window.convertedData;
+					} else {
+						alert('Keine gültigen Daten zum Download verfügbar.');
+						return;
+					}
+				}
+
+				const blob = new Blob([output], { type: 'application/jsonl' });
+				const url = URL.createObjectURL(blob);
+				const a = document.createElement('a');
+				a.href = url;
+				a.download = 'converted.jsonl';
+				document.body.appendChild(a);
+				a.click();
+				document.body.removeChild(a);
+				URL.revokeObjectURL(url);
+			}
+
+			let uploadedJsonlFiles = [];
+
+			function handleJsonlUpload() {
+				const fileInput = document.getElementById('jsonlFiles');
+				const files = fileInput.files;
+
+				if (!files || files.length === 0) return;
+
+				uploadedJsonlFiles = [];
+				document.getElementById('output').textContent = `${files.length} Dateien ausgewählt. Bereit zum Zusammenführen.`;
+
+				// Read all files
+				let filesRead = 0;
+				for (let i = 0; i < files.length; i++) {
+					const file = files[i];
+					const reader = new FileReader();
+
+					reader.onload = function (e) {
+						try {
+							const content = e.target.result;
+							uploadedJsonlFiles.push({
+								name: file.name,
+								content: content,
+								lines: content.split('\n').filter((line) => line.trim()),
+							});
+
+							filesRead++;
+							if (filesRead === files.length) {
+								document.getElementById('output').textContent = `${files.length} Dateien geladen. Insgesamt ${uploadedJsonlFiles.reduce(
+									(sum, f) => sum + f.lines.length,
+									0,
+								)} Zeilen.`;
+							}
+						} catch (error) {
+							document.getElementById('output').textContent = `Fehler beim Lesen von ${file.name}: ${error.message}`;
+						}
+					};
+
+					reader.readAsText(file);
+				}
+			}
+
+			function mergeJsonlFiles() {
+				if (uploadedJsonlFiles.length === 0) {
+					document.getElementById('output').textContent = 'Bitte wählen Sie zuerst JSONL-Dateien aus.';
+					return;
+				}
+
+				const strategy = document.querySelector('input[name="mergeStrategy"]:checked').value;
+				document.getElementById('output').textContent = 'JSONL-Dateien werden zusammengeführt...';
+
+				setTimeout(() => {
+					try {
+						let result = '';
+						let mergedCount = 0;
+						let duplicatesFound = 0;
+
+						if (strategy === 'keep_all') {
+							// Strategie 1: Alle Einträge behalten
+							uploadedJsonlFiles.forEach((file, fileIndex) => {
+								file.lines.forEach((line, lineIndex) => {
+									if (line.trim()) {
+										try {
+											const obj = JSON.parse(line);
+											// Füge Metadaten hinzu
+											obj._source_file = file.name;
+											obj._source_line = lineIndex + 1;
+											obj._file_index = fileIndex;
+											result += JSON.stringify(obj) + '\n';
+											mergedCount++;
+										} catch (e) {
+											console.warn(`Fehler in ${file.name} Zeile ${lineIndex + 1}:`, e);
+										}
+									}
+								});
+							});
+						} else if (strategy === 'merge_titles') {
+							// Strategie 2: Gleiche Titel - längeren Eintrag behalten
+							const titleGroups = {};
+
+							uploadedJsonlFiles.forEach((file, fileIndex) => {
+								file.lines.forEach((line, lineIndex) => {
+									if (line.trim()) {
+										try {
+											const obj = JSON.parse(line);
+											const title = obj.title || obj.name || obj.id || 'untitled';
+											const objString = JSON.stringify(obj);
+											const objLength = objString.length;
+
+											if (!titleGroups[title]) {
+												// Erster Eintrag mit diesem Titel
+												titleGroups[title] = {
+													...obj,
+													_source_file: file.name,
+													_source_line: lineIndex + 1,
+													_file_index: fileIndex,
+													_length: objLength,
+													_alternatives_found: 0,
+												};
+											} else {
+												// Titel bereits vorhanden - vergleiche Längen
+												duplicatesFound++;
+												if (objLength > titleGroups[title]._length) {
+													// Aktueller Eintrag ist länger - ersetzen
+													const oldLength = titleGroups[title]._length;
+													titleGroups[title] = {
+														...obj,
+														_source_file: file.name,
+														_source_line: lineIndex + 1,
+														_file_index: fileIndex,
+														_length: objLength,
+														_alternatives_found: titleGroups[title]._alternatives_found + 1,
+														_replaced_shorter: true,
+														_old_length: oldLength,
+													};
+												} else {
+													// Bestehender Eintrag ist länger/gleich - behalten
+													titleGroups[title]._alternatives_found++;
+												}
+											}
+										} catch (e) {
+											console.warn(`Fehler in ${file.name} Zeile ${lineIndex + 1}:`, e);
+										}
+									}
+								});
+							});
+
+							Object.values(titleGroups).forEach((group) => {
+								// Entferne interne Metadaten vor dem Export
+								const cleanGroup = { ...group };
+								delete cleanGroup._length;
+								result += JSON.stringify(cleanGroup) + '\n';
+								mergedCount++;
+							});
+						} else if (strategy === 'deduplicate') {
+							// Strategie 3: Duplikate entfernen
+							const seenTitles = new Set();
+
+							uploadedJsonlFiles.forEach((file, fileIndex) => {
+								file.lines.forEach((line, lineIndex) => {
+									if (line.trim()) {
+										try {
+											const obj = JSON.parse(line);
+											const title = obj.title || obj.name || obj.id || `untitled_${Date.now()}_${Math.random()}`;
+
+											if (!seenTitles.has(title)) {
+												seenTitles.add(title);
+												obj._source_file = file.name;
+												obj._source_line = lineIndex + 1;
+												obj._file_index = fileIndex;
+												result += JSON.stringify(obj) + '\n';
+												mergedCount++;
+											} else {
+												duplicatesFound++;
+											}
+										} catch (e) {
+											console.warn(`Fehler in ${file.name} Zeile ${lineIndex + 1}:`, e);
+										}
+									}
+								});
+							});
+						}
+
+						if (result.trim()) {
+							const sizeInMB = Math.round((result.length / 1024 / 1024) * 100) / 100;
+							document.getElementById('output').textContent =
+								`✅ ${uploadedJsonlFiles.length} Dateien zusammengeführt!\n` +
+								`${mergedCount} Einträge erstellt\n` +
+								`${duplicatesFound > 0 ? duplicatesFound + ' Duplikate ' + (strategy === 'deduplicate' ? 'entfernt' : 'gefunden') + '\n' : ''}` +
+								`Datei bereit zum Download (${sizeInMB} MB)`;
+
+							window.convertedData = result.trim();
+							document.getElementById('downloadBtn').style.display = 'inline-block';
+						} else {
+							document.getElementById('output').textContent = 'Keine gültigen JSONL-Einträge gefunden.';
+						}
+					} catch (error) {
+						document.getElementById('output').textContent = 'Fehler beim Zusammenführen: ' + error.message;
+					}
+				}, 100);
+			}
+
+			let uploadedIndexFiles = [];
+
+			function handleIndexUpload() {
+				const fileInput = document.getElementById('indexFiles');
+				const files = fileInput.files;
+
+				if (!files || files.length === 0) return;
+
+				uploadedIndexFiles = [];
+				document.getElementById('output').textContent = `${files.length} Dateien ausgewählt für Index-Erstellung.`;
+
+				// Read all files
+				let filesRead = 0;
+				for (let i = 0; i < files.length; i++) {
+					const file = files[i];
+					const reader = new FileReader();
+
+					reader.onload = function (e) {
+						try {
+							const content = e.target.result;
+							uploadedIndexFiles.push({
+								name: file.name,
+								content: content,
+								lines: content.split('\n').filter((line) => line.trim()),
+							});
+
+							filesRead++;
+							if (filesRead === files.length) {
+								document.getElementById('output').textContent = `${files.length} Dateien geladen. Insgesamt ${uploadedIndexFiles.reduce(
+									(sum, f) => sum + f.lines.length,
+									0,
+								)} Einträge gefunden.`;
+							}
+						} catch (error) {
+							document.getElementById('output').textContent = `Fehler beim Lesen von ${file.name}: ${error.message}`;
+						}
+					};
+
+					reader.readAsText(file);
+				}
+			}
+
+			function extractTags(content) {
+				// Einfache Tag-Extraktion basierend auf häufigen Wörtern und Themen
+				const text = JSON.stringify(content).toLowerCase();
+				const commonTags = {
+					'ki': ['ki', 'artificial intelligence', 'machine learning', 'neural', 'deep learning'],
+					'programmierung': ['code', 'programming', 'function', 'variable', 'algorithm'],
+					'web': ['html', 'css', 'javascript', 'website', 'browser'],
+					'datenbank': ['database', 'sql', 'query', 'table', 'data'],
+					'sicherheit': ['security', 'password', 'encryption', 'vulnerability'],
+					'ethik': ['ethics', 'moral', 'responsibility', 'guidelines'],
+					'wissenschaft': ['research', 'study', 'analysis', 'theory'],
+					'business': ['business', 'marketing', 'strategy', 'customer'],
+					'gesundheit': ['health', 'medical', 'doctor', 'treatment'],
+					'bildung': ['education', 'learning', 'teach', 'student'],
+					'technologie': ['technology', 'innovation', 'digital', 'tech'],
+				};
+
+				const foundTags = [];
+				for (const [tag, keywords] of Object.entries(commonTags)) {
+					if (keywords.some((keyword) => text.includes(keyword))) {
+						foundTags.push(tag);
+					}
+				}
+
+				return foundTags.length > 0 ? foundTags : ['general'];
+			}
+
+			function createSummary(content) {
+				// Einfache Zusammenfassung basierend auf erstem Teil des Inhalts
+				let text = '';
+
+				if (typeof content === 'string') {
+					text = content;
+				} else if (content.messages && Array.isArray(content.messages)) {
+					// ChatGPT-Format
+					text = content.messages.map((m) => m.content?.parts?.join(' ') || m.content || '').join(' ');
+				} else if (content.conversation && Array.isArray(content.conversation)) {
+					// Anderes Chat-Format
+					text = content.conversation.map((c) => c.content || c.text || '').join(' ');
+				} else {
+					text = JSON.stringify(content);
+				}
+
+				// Erste 200 Zeichen als Zusammenfassung
+				const summary = text.substring(0, 200).trim();
+				return summary.length < text.length ? summary + '...' : summary;
+			}
+
+			function extractCreatedAt(content) {
+				// Versuche Erstellungsdatum zu extrahieren
+				const candidates = [content.create_time, content.created_at, content.timestamp, content.date, content.created, content.update_time];
+
+				for (const candidate of candidates) {
+					if (candidate) {
+						try {
+							// Unix timestamp zu ISO string
+							if (typeof candidate === 'number') {
+								return new Date(candidate * 1000).toISOString();
+							}
+							// Bereits ein String
+							if (typeof candidate === 'string') {
+								return new Date(candidate).toISOString();
+							}
+						} catch (e) {
+							continue;
+						}
+					}
+				}
+
+				// Fallback: aktuelles Datum
+				return new Date().toISOString();
+			}
+
+			function createIndex() {
+				if (uploadedIndexFiles.length === 0) {
+					document.getElementById('output').textContent = 'Bitte wählen Sie zuerst JSONL-Dateien aus.';
+					return;
+				}
+
+				const autoTags = document.getElementById('autoTags').checked;
+				const autoSummary = document.getElementById('autoSummary').checked;
+				const includeContent = document.getElementById('includeContent').checked;
+
+				document.getElementById('output').textContent = 'Index wird erstellt...';
+
+				setTimeout(() => {
+					try {
+						let indexEntries = [];
+						let processedCount = 0;
+
+						uploadedIndexFiles.forEach((file, fileIndex) => {
+							file.lines.forEach((line, lineIndex) => {
+								if (line.trim()) {
+									try {
+										const obj = JSON.parse(line);
+
+										// Titel extrahieren
+										const title =
+											obj.title ||
+											obj.name ||
+											obj.id ||
+											(obj.messages && obj.messages[0]?.content?.parts?.[0]?.substring(0, 50)) ||
+											`Eintrag ${lineIndex + 1}`;
+
+										// Index-Eintrag erstellen
+										const indexEntry = {
+											file: file.name,
+											line: lineIndex + 1,
+											title: title,
+											created_at: extractCreatedAt(obj),
+										};
+
+										// Optional: Tags hinzufügen
+										if (autoTags) {
+											indexEntry.tags = extractTags(obj);
+										}
+
+										// Optional: Zusammenfassung hinzufügen
+										if (autoSummary) {
+											indexEntry.summary = createSummary(obj);
+										}
+
+										// Optional: Vollständigen Inhalt einbetten
+										if (includeContent) {
+											indexEntry.content = obj;
+										}
+
+										indexEntries.push(indexEntry);
+										processedCount++;
+									} catch (e) {
+										console.warn(`Fehler in ${file.name} Zeile ${lineIndex + 1}:`, e);
+									}
+								}
+							});
+						});
+
+						// Index als JSONL formatieren
+						const indexResult = indexEntries.map((entry) => JSON.stringify(entry)).join('\n');
+
+						if (indexResult.trim()) {
+							const sizeInMB = Math.round((indexResult.length / 1024 / 1024) * 100) / 100;
+							document.getElementById('output').textContent =
+								`✅ Index erstellt!\n` + `${processedCount} Einträge aus ${uploadedIndexFiles.length} Dateien\n` + `Index bereit zum Download (${sizeInMB} MB)`;
+
+							window.convertedData = indexResult;
+							document.getElementById('downloadBtn').style.display = 'inline-block';
+						} else {
+							document.getElementById('output').textContent = 'Keine gültigen Einträge für Index gefunden.';
+						}
+					} catch (error) {
+						document.getElementById('output').textContent = 'Fehler beim Erstellen des Index: ' + error.message;
+					}
+				}, 100);
+			}
+		</script>
+	</body>
+</html>
