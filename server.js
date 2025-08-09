@@ -50,7 +50,7 @@ app.use(express.static(path.join(__dirname))); // Serve static files from the ro
 
 // Route for the root path - serve the index.html file
 app.get('/', function (req, res) {
-	res.sendFile(path.join(__dirname, 'sites', 'index.html'));
+	res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // Route for favicon

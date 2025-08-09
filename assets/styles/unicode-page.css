@@ -1,0 +1,49 @@
+/* Unicode page styles - scoped to .style-unicode-page */
+.style-unicode-page {
+	background: linear-gradient(135deg, #0f1320, #1b2340);
+	padding: 2rem;
+	border-radius: 12px;
+	margin: 1rem 0;
+	color: #e6e6f0;
+	border: 1px solid #1f2942;
+	box-shadow: 0 8px 25px rgba(15, 19, 32, 0.4);
+}
+
+.style-unicode-page h1,
+.style-unicode-page h2,
+.style-unicode-page h3 {
+	color: #3a7afe;
+	text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+	margin-top: 0;
+}
+
+.style-unicode-page h1 {
+	font-size: clamp(24px, 4vw, 32px);
+	margin-bottom: 1rem;
+}
+
+.style-unicode-page p {
+	color: #9aa0a6;
+	line-height: 1.6;
+	margin-bottom: 1rem;
+}
+
+.style-unicode-page .unicode-intro {
+	background: rgba(58, 122, 254, 0.1);
+	border: 1px solid rgba(58, 122, 254, 0.2);
+	border-radius: 8px;
+	padding: 1rem;
+	margin: 1rem 0;
+}
+
+.style-unicode-page .unicode-intro h4 {
+	color: #3a7afe;
+	margin: 0 0 0.5rem 0;
+	font-size: 16px;
+}
+
+.style-unicode-page .unicode-intro p {
+	margin: 0;
+	color: #e6e6f0;
+	font-size: 14px;
+}

@@ -27,6 +27,20 @@
 			"content": "Sammlung verschiedener nützlicher Tools und Utilities.",
 			"pageId": "page3",
 			"style": "tools-overview"
+		},
+		{
+			"id": "art5",
+			"title": "Unicode Coverage Tester",
+			"content": "Tool zum Testen der Unicode-Abdeckung von Schriftarten im Bereich U+0000..U+1FFFF.",
+			"pageId": "unicode-page",
+			"style": "tool-theme"
+		},
+		{
+			"id": "art5",
+			"title": "Unicode Coverage Tester",
+			"content": "Professionelles Tool zur Analyse der Unicode-Unterstützung von Schriftarten mit visueller Darstellung.",
+			"pageId": "unicode-page",
+			"style": "tool-theme"
 		}
 	],
 	"pages": [
@@ -51,8 +65,20 @@
 		{
 			"id": "page3",
 			"title": "Tools & Utilities",
-			"sections": ["sec4", "sec5"],
+			"sections": ["sec4", "sec5", "sec6"],
 			"style": "tools-page"
+		},
+		{
+			"id": "unicode-page",
+			"title": "Unicode Coverage Tester",
+			"sections": ["unicode-section"],
+			"style": "converter-page"
+		},
+		{
+			"id": "unicode-page",
+			"title": "Unicode Coverage Tester",
+			"sections": ["sec6"],
+			"style": "unicode-page"
 		}
 	],
 	"sections": [
@@ -109,6 +135,20 @@
 			"content": "embedded-tool:anothertool",
 			"toolType": "anothertool",
 			"style": "another-tool-section"
+		},
+		{
+			"id": "sec6",
+			"title": "Unicode Coverage Tester",
+			"content": "embedded-tool:unicode-tester",
+			"toolType": "unicode-tester",
+			"inline-style": true
+		},
+		{
+			"id": "unicode-section",
+			"title": "Unicode Coverage Tester",
+			"content": "embedded-tool:unicode-tester",
+			"toolType": "unicode-tester",
+			"inline-style": true
 		}
 	],
 	"pagetree": {
@@ -138,6 +178,11 @@
 				"id": "art4",
 				"type": "article",
 				"title": "Tools"
+			},
+			{
+				"id": "art5",
+				"type": "article",
+				"title": "Unicode Tester"
 			}
 		]
 	}

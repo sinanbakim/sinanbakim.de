@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unicode Coverage Tester — U+0000..U+1FFFF</title>
+<style>
+  :root {
+    --bg:#0b0d12; --fg:#e6e6f0; --muted:#9aa0a6; --card:#121521; --acc:#3a7afe; --bad:#cc3b3b; --ok:#27ae60;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+  header{position:sticky;top:0;z-index:10;background:#0f1320;padding:12px 16px;border-bottom:1px solid #1f2942}
+  h1{margin:0 0 6px 0;font-size:18px}
+  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  input[type=text], input[type=number]{padding:8px 10px;border:1px solid #2a3558;background:#0e1220;color:var(--fg);border-radius:8px;min-width:110px}
+  input[type=number]{width:120px}
+  button{padding:9px 12px;border:0;border-radius:8px;background:#2a3558;color:#e8ecff;cursor:pointer}
+  button:hover{filter:brightness(1.09)}
+  main{padding:16px}
+  .card{background:var(--card);border:1px solid #1b2340;border-radius:12px;padding:12px;margin-bottom:12px}
+  .meta{color:var(--muted);font-size:12px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:8px}
+  .cell{background:#0f1426;border:1px solid #222b4a;border-radius:10px;padding:6px;text-align:center}
+  .glyph{font-size:28px;line-height:1.2;min-height:40px}
+  .cp{font-size:11px;color:var(--muted)}
+  .status{font-size:11px;margin-top:2px}
+  .ok{color:var(--ok)} .bad{color:var(--bad)}
+  .bar{height:10px;background:#0e1220;border:1px solid #1b2340;border-radius:10px;overflow:hidden}
+  .fill{height:100%;background:linear-gradient(90deg,var(--ok),#4fd07a)}
+  .kbd{font:12px/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; background:#121727;color:#d4d9ff;border:1px solid #29335b;border-radius:6px;padding:2px 6px}
+  .warn{color:#ffce5a}
+</style>
+</head>
+<body>
+<header>
+  <h1>Unicode Coverage Tester — U+0000..U+1FFFF</h1>
+  <div class="row">
+    <label>Font-Stack:&nbsp;</label>
+    <input id="stack" type="text" size="60" value='ui-sans-serif, -apple-system, system-ui, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, "Segoe UI Emoji", "Segoe UI Symbol", sans-serif'>
+    <button id="apply">Anwenden</button>
+    <label>Start (hex):</label><input id="start" type="text" value="0000">
+    <label>Ende (hex):</label><input id="end" type="text" value="1FFFF">
+    <label>Chunk:</label><input id="chunk" type="number" value="2048" min="128" max="8192" step="128">
+    <button id="render">Rendern</button>
+    <button id="onlyMissing">Nur fehlende</button>
+    <button id="export">Als CSV exportieren</button>
+  </div>
+  <div class="meta" id="meta"></div>
+</header>
+
+<main>
+  <div class="card">
+    <div class="meta">
+      Tipp: Das gesamte Intervall U+0000..U+1FFFF umfasst 131072 Codepoints. Um die UI nicht zu blockieren, wird in <span class="kbd">Chunks</span> gerendert.
+      Du kannst die Größe oben einstellen. Steuer- und Surrogatbereiche werden automatisch übersprungen. Fehlende Glyphen werden mit einer roten Markierung gekennzeichnet.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="meta">Abdeckung im aktuellen Intervall: <span id="summary">–</span></div>
+    <div class="bar"><div class="fill" id="fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="card">
+    <div class="grid" id="grid"></div>
+  </div>
+</main>
+
+<script>
+(function(){
+  const grid = document.getElementById('grid');
+  const meta = document.getElementById('meta');
+  const summary = document.getElementById('summary');
+  const fill = document.getElementById('fill');
+  const stackEl = document.getElementById('stack');
+  const startEl = document.getElementById('start');
+  const endEl = document.getElementById('end');
+  const chunkEl = document.getElementById('chunk');
+  const btnApply = document.getElementById('apply');
+  const btnRender = document.getElementById('render');
+  const btnMissing = document.getElementById('onlyMissing');
+  const btnExport = document.getElementById('export');
+  let onlyMissing = false;
+  let currentCells = [];
+
+  const hex = n => n.toString(16).toUpperCase().padStart(4,'0');
+  const parseHex = s => { s = s.trim().replace(/^U\+/i,''); return parseInt(s,16); };
+
+  const inSurrogate = cp => cp>=0xD800 && cp<=0xDFFF;
+  const isControl = cp => (cp<=0x001F) || (cp>=0x007F && cp<=0x009F);
+  const skippable = cp => inSurrogate(cp);
+
+  function isRenderable(char, stack){
+    // Width-comparison vs U+FFFD and against an ASCII ref
+    const s = document.createElement('span');
+    const refMissing = document.createElement('span');
+    const refA = document.createElement('span');
+    s.style.visibility = refMissing.style.visibility = refA.style.visibility = 'hidden';
+    s.style.position = refMissing.style.position = refA.style.position = 'absolute';
+    s.style.font = refMissing.style.font = refA.style.font = '32px ' + stack;
+    s.textContent = char;
+    refMissing.textContent = '\\uFFFD';
+    refA.textContent = 'A';
+    document.body.append(s, refMissing, refA);
+    const w = s.getBoundingClientRect().width;
+    const wMissing = refMissing.getBoundingClientRect().width;
+    const wA = refA.getBoundingClientRect().width;
+    s.remove(); refMissing.remove(); refA.remove();
+    return !(w === wMissing && wA !== wMissing);
+  }
+
+  function makeCell(cp, stack){
+    const ch = String.fromCodePoint(cp);
+    const cell = document.createElement('div'); cell.className='cell';
+    const glyph = document.createElement('div'); glyph.className='glyph'; glyph.textContent = (isControl(cp) ? '·' : ch);
+    const code = document.createElement('div'); code.className='cp'; code.textContent = 'U+' + cp.toString(16).toUpperCase().padStart(4, '0');
+    const status = document.createElement('div'); status.className='status'; 
+    glyph.style.fontFamily = stack;
+    const ok = !skippable(cp) && isRenderable(ch, stack);
+    status.textContent = ok ? 'ok' : (skippable(cp) ? 'skip' : 'fehlend');
+    status.className = 'status ' + (ok ? 'ok' : (skippable(cp) ? '' : 'bad'));
+    cell.style.opacity = (onlyMissing && ok) ? .20 : 1;
+    if (!ok && !skippable(cp)) cell.style.outline = '1px dashed var(--bad)';
+    cell.append(glyph, code, status);
+    return {cp, ok, el:cell};
+  }
+
+  function info(){
+    meta.textContent = 'Aktueller Stack: ' + getComputedStyle(document.body).fontFamily + ' (gesetzt: ' + stackEl.value + ')';
+  }
+
+  async function renderRange(start, end, chunk){
+    grid.innerHTML='';
+    currentCells = [];
+    const stack = stackEl.value;
+    document.body.style.fontFamily = stack;
+
+    let total = 0, okCount = 0, skipped = 0;
+    function renderChunk(from, to){
+      const frag = document.createDocumentFragment();
+      for (let cp=from; cp<=to; cp++){
+        if (skippable(cp)) { skipped++; continue; }
+        const cell = makeCell(cp, stack);
+        total++; if (cell.ok) okCount++;
+        if (!onlyMissing || !cell.ok) frag.appendChild(cell.el);
+      }
+      grid.appendChild(frag);
+      const pct = total ? Math.round(okCount/total*100) : 0;
+      summary.textContent = okCount + ' / ' + total + ' sichtbar ('+pct+'%) — Skipped: '+skipped;
+      fill.style.width = pct + '%';
+    }
+
+    let from = start;
+    while (from <= end){
+      const to = Math.min(from + chunk - 1, end);
+      renderChunk(from, to);
+      from = to + 1;
+      await new Promise(requestAnimationFrame);
+    }
+  }
+
+  btnApply.addEventListener('click', ()=>{ info(); });
+  btnMissing.addEventListener('click', ()=>{ onlyMissing = !onlyMissing; btnMissing.textContent = onlyMissing ? 'Alle zeigen' : 'Nur fehlende'; });
+  btnRender.addEventListener('click', ()=>{
+    const start = parseHex(startEl.value);
+    const end = parseHex(endEl.value);
+    const chunk = parseInt(chunkEl.value,10) || 2048;
+    renderRange(start, end, chunk);
+  });
+  btnExport.addEventListener('click', ()=>{
+    // Export current range coverage as CSV (cp, status)
+    const start = parseHex(startEl.value);
+    const end = parseHex(endEl.value);
+    const stack = stackEl.value;
+    let csv = 'codepoint,status\\n';
+    for (let cp=start; cp<=end; cp++){
+      if (skippable(cp)) continue;
+      const ch = String.fromCodePoint(cp);
+      const ok = isRenderable(ch, stack);
+      csv += 'U+'+hex(cp)+','+(ok?'ok':'missing')+'\\n';
+    }
+    const blob = new Blob([csv], {type:'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'unicode_'+hex(start)+'_'+hex(end)+'_coverage.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // Initial info + default render of a safe sample range
+  info();
+  // default render a smaller starter slice to show it's working
+  renderRange(0x0000, 0x04FF, 1024);
+})();
+</script>
+</body>
+</html>

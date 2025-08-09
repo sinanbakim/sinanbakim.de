@@ -55,6 +55,15 @@
 			"description": "KI-gestütztes Assistenzsystem für kreative und analytische Arbeiten. Fokus auf ethische AI-Entwicklung.",
 			"category": "ai",
 			"style": "ai-card"
+		},
+		{
+			"id": "unicode-tester",
+			"title": "Unicode Coverage Tester",
+			"tag": "Typography Tool",
+			"description": "Umfassendes Tool zum Testen der Unicode-Abdeckung von Schriftarten. Unterstützt U+0000 bis U+1FFFF mit visueller Darstellung.",
+			"details": "→ Font-Stack Testing · Glyph Rendering · CSV Export · Coverage Analysis",
+			"category": "tool",
+			"style": "tool-card"
 		}
 	],
 	"workAreas": [
