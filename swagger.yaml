@@ -1,0 +1,241 @@
+openapi: 3.0.3
+info:
+    title: Sinya File & JSONL API
+    version: 1.2.0
+    description: |
+        File-Bridge + JSONL-Chunking mit Zeichenbudget (base64-Payload).
+        Unterstützt Upload/Append/Download/List/Status sowie intelligentes JSONL-Chunking für große Dateien.
+servers:
+    - url: https://sinanbakim.de
+      description: Production
+security:
+    - ApiKeyAuth: []
+components:
+    securitySchemes:
+        ApiKeyAuth:
+            type: apiKey
+            in: header
+            name: x-api-key
+    schemas:
+        Ok:
+            type: object
+            properties:
+                ok:
+                    type: boolean
+                    example: true
+                message:
+                    type: string
+                    example: 'saved filename.json'
+        Error:
+            type: object
+            properties:
+                ok:
+                    type: boolean
+                    example: false
+                error:
+                    type: string
+                    example: 'file not found'
+        Status:
+            type: object
+            properties:
+                phase:
+                    type: string
+                    nullable: true
+                    example: 'timeline'
+                part:
+                    type: integer
+                    nullable: true
+                    example: 1200
+                extra:
+                    type: object
+                    nullable: true
+                updated:
+                    type: string
+                    nullable: true
+                    format: date-time
+                    example: '2025-08-10T12:00:00.000Z'
+        JsonlMeta:
+            type: object
+            properties:
+                start:
+                    type: integer
+                    example: 1200
+                end:
+                    type: integer
+                    example: 1499
+                lines:
+                    type: integer
+                    example: 300
+                chars:
+                    type: integer
+                    example: 11850
+                nextCursor:
+                    type: integer
+                    example: 1500
+                truncated:
+                    type: boolean
+                    example: false
+                oversize:
+                    type: boolean
+                    example: false
+                codeRatio:
+                    type: number
+                    format: float
+                    example: 0.15
+paths:
+    /api/upload:
+        post:
+            security: [{ ApiKeyAuth: [] }]
+            summary: Datei speichern/überschreiben
+            description: Speichert eine Datei im DATA_DIR. Unterstützt UTF-8 und Base64 Encoding.
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required: [filename, content]
+                            properties:
+                                filename:
+                                    type: string
+                                    example: 'sinya_config.json'
+                                content:
+                                    type: string
+                                    example: '{"maxChars": 12000}'
+                                encoding:
+                                    type: string
+                                    enum: [utf8, utf-8, base64]
+                                    default: utf8
+            responses:
+                '200':
+                    description: Datei erfolgreich gespeichert
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Ok'
+                '400':
+                    description: Ungültige Anfrage
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                '401':
+                    description: Nicht autorisiert
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+    /api/append:
+        post:
+            security: [{ ApiKeyAuth: [] }]
+            summary: Text an Datei anhängen
+            description: Hängt Text an eine bestehende Datei an oder erstellt eine neue.
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required: [filename, content]
+                            properties:
+                                filename:
+                                    type: string
+                                    example: 'sinya/errors.log'
+                                content:
+                                    type: string
+                                    example: '2025-08-10T12:00:00Z INFO chunk processed'
+                                newline:
+                                    type: boolean
+                                    default: true
+                                    description: 'Fügt automatisch eine neue Zeile hinzu'
+            responses:
+                '200':
+                    description: Text erfolgreich angehängt
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Ok'
+                '400':
+                    description: Ungültige Anfrage
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+    /api/download/{filename}:
+        get:
+            security: [{ ApiKeyAuth: [] }]
+            summary: Datei herunterladen
+            description: Lädt eine Datei aus dem DATA_DIR herunter.
+            parameters:
+                - in: path
+                  name: filename
+                  required: true
+                  schema:
+                      type: string
+                      example: 'sinya_config.json'
+            responses:
+                '200':
+                    description: Datei erfolgreich abgerufen
+                    content:
+                        application/octet-stream:
+                            schema:
+                                type: string
+                                format: binary
+                        text/plain:
+                            schema:
+                                type: string
+                '404':
+                    description: Datei nicht gefunden
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+    /api/list:
+        get:
+            security: [{ ApiKeyAuth: [] }]
+            summary: Dateien auflisten
+            description: Listet Dateien im DATA_DIR auf mit optionaler Filterung.
+            parameters:
+                - in: query
+                  name: pattern
+                  schema:
+                      type: string
+                      example: 'sinya'
+                  description: 'Substring-Filter (case-insensitive)'
+                - in: query
+                  name: ext
+                  schema:
+                      type: string
+                      example: '.json'
+                  description: 'Dateiendung-Filter'
+                - in: query
+                  name: limit
+                  schema:
+                      type: integer
+                      default: 1000
+                      maximum: 5000
+                  description: 'Maximale Anzahl Dateien'
+            responses:
+                '200':
+                    description: Dateiliste erfolgreich abgerufen
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    dir:
+                                        type: string
+                                        example: '/var/www/vhosts/sinanbakim.de/data'
+                                    count:
+                                        type: integer
+                                        example: 42
+                                    files:
+                                        type: array
+                                        items:
+                                            type: string
+                                        example: ['sinya_config.json', 'conversations_2025.jsonl']
+    /api/status:
+        get:
+            security: [{ ApiKeyAuth: [] }]
+            summary: Verarbeitungsstatus lesen
+            description: Liest den aktuellen Verarbeitungsstatus

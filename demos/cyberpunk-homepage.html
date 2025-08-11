@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="de">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>MATRIX.NET // Digital Identity</title>
+		<style>
+			@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@300;400;700&display=swap');
+
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+
+			:root {
+				--primary-cyan: #00ffff;
+				--primary-green: #00ff00;
+				--neon-purple: #ff00ff;
+				--matrix-green: #41ff00;
+				--dark-bg: #000011;
+				--terminal-bg: #001100;
+				--glow-intensity: 0 0 10px;
+			}
+
+			body {
+				background: linear-gradient(135deg, #000011 0%, #001133 50%, #000022 100%);
+				color: var(--primary-cyan);
+				font-family: 'JetBrains Mono', monospace;
+				min-height: 100vh;
+				overflow-x: hidden;
+				position: relative;
+			}
+
+			/* Matrix rain effect background */
+			.matrix-bg {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				pointer-events: none;
+				z-index: -1;
+				background: radial-gradient(circle at 25% 25%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+					radial-gradient(circle at 75% 75%, rgba(255, 0, 255, 0.1) 0%, transparent 50%);
+			}
+
+			/* Scanning line animation */
+			.scan-line {
+				position: fixed;
+				top: 0;
+				left: 0;
+				right: 0;
+				height: 2px;
+				background: linear-gradient(90deg, transparent, var(--primary-cyan), transparent);
+				animation: scan 3s linear infinite;
+				z-index: 1000;
+			}
+
+			@keyframes scan {
+				0% {
+					transform: translateY(0);
+				}
+				100% {
+					transform: translateY(100vh);
+				}
+			}
+
+			/* Terminal window styling */
+			.terminal {
+				background: rgba(0, 17, 0, 0.9);
+				border: 2px solid var(--neon-purple);
+				border-radius: 8px;
+				margin: 1rem;
+				box-shadow: var(--glow-intensity) var(--neon-purple), inset 0 0 20px rgba(0, 255, 0, 0.1);
+				backdrop-filter: blur(10px);
+			}
+
+			.terminal-header {
+				background: linear-gradient(90deg, var(--neon-purple), #003300);
+				padding: 0.5rem 1rem;
+				display: flex;
+				align-items: center;
+				border-bottom: 1px solid var(--neon-purple);
+			}
+
+			.terminal-dots {
+				display: flex;
+				gap: 0.5rem;
+				margin-right: 1rem;
+			}
+
+			.dot {
+				width: 12px;
+				height: 12px;
+				border-radius: 50%;
+				background: var(--matrix-green);
+				box-shadow: 0 0 5px var(--matrix-green);
+			}
+
+			.terminal-title {
+				font-family: 'Orbitron', monospace;
+				font-weight: 700;
+				color: #000;
+				text-transform: uppercase;
+			}
+
+			.terminal-content {
+				padding: 1.5rem;
+				font-size: 0.9rem;
+				line-height: 1.6;
+			}
+
+			/* Header section */
+			.main-header {
+				text-align: center;
+				padding: 2rem;
+				position: relative;
+			}
+
+			.glitch-title {
+				font-family: 'Orbitron', monospace;
+				font-size: 3rem;
+				font-weight: 900;
+				color: var(--primary-cyan);
+				text-transform: uppercase;
+				letter-spacing: 0.2em;
+				text-shadow: 0 0 5px var(--primary-cyan), 0 0 10px var(--primary-cyan), 0 0 20px var(--primary-cyan);
+				animation: glitch 2s infinite;
+				margin-bottom: 0.5rem;
+			}
+
+			@keyframes glitch {
+				0%,
+				98% {
+					text-shadow: 0 0 5px var(--primary-cyan), 0 0 10px var(--primary-cyan), 0 0 20px var(--primary-cyan);
+				}
+				1% {
+					text-shadow: 2px 0 var(--neon-purple), -2px 0 var(--matrix-green);
+				}
+				2% {
+					text-shadow: -2px 0 var(--neon-purple), 2px 0 var(--matrix-green);
+				}
+			}
+
+			.subtitle {
+				font-family: 'JetBrains Mono', monospace;
+				color: var(--matrix-green);
+				font-size: 1.2rem;
+				margin-bottom: 2rem;
+			}
+
+			/* HUD-style containers */
+			.hud-container {
+				display: grid;
+				grid-template-columns: 1fr 2fr 1fr;
+				gap: 1rem;
+				margin: 2rem 1rem;
+			}
+
+			.hud-panel {
+				background: rgba(0, 255, 255, 0.05);
+				border: 1px solid var(--primary-cyan);
+				border-radius: 12px;
+				padding: 1.5rem;
+				position: relative;
+				backdrop-filter: blur(5px);
+				box-shadow: inset 0 0 20px rgba(0, 255, 255, 0.1);
+			}
+
+			.hud-panel::before {
+				content: '';
+				position: absolute;
+				top: -1px;
+				left: -1px;
+				right: -1px;
+				bottom: -1px;
+				background: linear-gradient(45deg, var(--primary-cyan), var(--neon-purple), var(--matrix-green), var(--primary-cyan));
+				border-radius: 12px;
+				z-index: -1;
+				animation: border-glow 3s ease-in-out infinite alternate;
+			}
+
+			@keyframes border-glow {
+				0% {
+					opacity: 0.5;
+				}
+				100% {
+					opacity: 1;
+				}
+			}
+
+			.hud-title {
+				font-family: 'Orbitron', monospace;
+				color: var(--primary-cyan);
+				font-weight: 700;
+				margin-bottom: 1rem;
+				text-transform: uppercase;
+				font-size: 0.9rem;
+				letter-spacing: 0.1em;
+			}
+
+			/* Profile section */
+			.profile-image {
+				width: 100px;
+				height: 100px;
+				background: linear-gradient(45deg, var(--primary-cyan), var(--neon-purple));
+				border-radius: 50%;
+				margin: 0 auto 1rem;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 2rem;
+				box-shadow: 0 0 20px var(--primary-cyan);
+			}
+
+			/* Skills grid */
+			.skills-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+				gap: 0.5rem;
+			}
+
+			.skill-chip {
+				background: rgba(255, 0, 255, 0.2);
+				border: 1px solid var(--neon-purple);
+				padding: 0.5rem;
+				text-align: center;
+				border-radius: 6px;
+				font-size: 0.8rem;
+				transition: all 0.3s ease;
+			}
+
+			.skill-chip:hover {
+				background: rgba(255, 0, 255, 0.4);
+				box-shadow: 0 0 10px var(--neon-purple);
+				transform: scale(1.05);
+			}
+
+			/* Command line interface */
+			.cli-section {
+				background: rgba(0, 0, 0, 0.8);
+				border: 2px solid var(--neon-purple);
+				border-radius: 8px;
+				margin: 2rem 1rem;
+				overflow: hidden;
+			}
+
+			.cli-header {
+				background: var(--neon-purple);
+				color: #000;
+				padding: 0.5rem 1rem;
+				font-family: 'Orbitron', monospace;
+				font-weight: 700;
+			}
+
+			.cli-content {
+				padding: 1rem;
+				background: #000;
+			}
+
+			.cli-line {
+				margin-bottom: 0.5rem;
+				font-family: 'JetBrains Mono', monospace;
+			}
+
+			.prompt {
+				color: var(--matrix-green);
+			}
+
+			.command {
+				color: var(--primary-cyan);
+			}
+
+			.output {
+				color: #fff;
+				margin-left: 2rem;
+			}
+
+			/* Navigation */
+			.nav-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+				gap: 1rem;
+				margin: 2rem 1rem;
+			}
+
+			.nav-button {
+				background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+				border: 2px solid transparent;
+				background-clip: padding-box;
+				padding: 1rem;
+				text-align: center;
+				text-decoration: none;
+				color: var(--primary-cyan);
+				font-family: 'Orbitron', monospace;
+				font-weight: 700;
+				text-transform: uppercase;
+				transition: all 0.3s ease;
+				position: relative;
+				overflow: hidden;
+			}
+
+			.nav-button::before {
+				content: '';
+				position: absolute;
+				top: 0;
+				left: -100%;
+				width: 100%;
+				height: 100%;
+				background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+				transition: left 0.5s;
+			}
+
+			.nav-button:hover::before {
+				left: 100%;
+			}
+
+			.nav-button:hover {
+				box-shadow: 0 0 20px var(--primary-cyan), inset 0 0 20px rgba(0, 255, 255, 0.1);
+				transform: translateY(-2px);
+			}
+
+			/* Responsive design */
+			@media (max-width: 768px) {
+				.hud-container {
+					grid-template-columns: 1fr;
+				}
+
+				.glitch-title {
+					font-size: 2rem;
+				}
+
+				.nav-grid {
+					grid-template-columns: 1fr;
+				}
+			}
+
+			/* Typing animation for CLI */
+			.typing::after {
+				content: '█';
+				animation: blink 1s infinite;
+			}
+
+			@keyframes blink {
+				0%,
+				50% {
+					opacity: 1;
+				}
+				51%,
+				100% {
+					opacity: 0;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="matrix-bg"></div>
+		<div class="scan-line"></div>
+
+		<header class="main-header">
+			<h1 class="glitch-title">SINAN.EXE</h1>
+			<p class="subtitle">// Digital Identity Matrix //</p>
+		</header>
+
+		<div class="terminal">
+			<div class="terminal-header">
+				<div class="terminal-dots">
+					<div class="dot"></div>
+					<div class="dot"></div>
+					<div class="dot"></div>
+				</div>
+				<div class="terminal-title">System Status: ONLINE</div>
+			</div>
+			<div class="terminal-content">
+				<p>Establishing secure connection...</p>
+				<p>
+					Identity verification:
+					<span style="color: var(--matrix-green)">[SUCCESS]</span>
+				</p>
+				<p>Loading digital persona...</p>
+			</div>
+		</div>
+
+		<div class="hud-container">
+			<div class="hud-panel">
+				<h3 class="hud-title">:: User Profile ::</h3>
+				<div class="profile-image">👤</div>
+				<div style="text-align: center">
+					<p>
+						<strong>Name:</strong>
+						Sinan Bakim
+					</p>
+					<p>
+						<strong>Status:</strong>
+						<span style="color: var(--matrix-green)">Active</span>
+					</p>
+					<p>
+						<strong>Role:</strong>
+						Digital Architect
+					</p>
+					<p>
+						<strong>Location:</strong>
+						Cyberspace
+					</p>
+				</div>
+			</div>
+
+			<div class="hud-panel">
+				<h3 class="hud-title">:: System Capabilities ::</h3>
+				<div class="skills-grid">
+					<div class="skill-chip">Neural Networks</div>
+					<div class="skill-chip">Quantum Code</div>
+					<div class="skill-chip">Web Assembly</div>
+					<div class="skill-chip">Data Mining</div>
+					<div class="skill-chip">AI Integration</div>
+					<div class="skill-chip">Cybersecurity</div>
+					<div class="skill-chip">Cloud Systems</div>
+					<div class="skill-chip">Blockchain</div>
+				</div>
+			</div>
+
+			<div class="hud-panel">
+				<h3 class="hud-title">:: Network Stats ::</h3>
+				<p>
+					Uptime:
+					<span style="color: var(--matrix-green)">99.9%</span>
+				</p>
+				<p>
+					Connections:
+					<span style="color: var(--primary-cyan)">∞</span>
+				</p>
+				<p>
+					Data Processed:
+					<span style="color: var(--neon-purple)">47.3 TB</span>
+				</p>
+				<p>
+					Security Level:
+					<span style="color: var(--matrix-green)">MAXIMUM</span>
+				</p>
+				<br />
+				<p style="font-size: 0.8rem; opacity: 0.7">Last sync: 2025.08.11_14:30:42</p>
+			</div>
+		</div>
+
+		<div class="cli-section">
+			<div class="cli-header">COMMAND LINE INTERFACE</div>
+			<div class="cli-content">
+				<div class="cli-line">
+					<span class="prompt">root@matrix:~$</span>
+					<span class="command">whoami</span>
+				</div>
+				<div class="output">Sinan Bakim - Digital Architect & Code Wizard</div>
+
+				<div class="cli-line">
+					<span class="prompt">root@matrix:~$</span>
+					<span class="command">ls -la projects/</span>
+				</div>
+				<div class="output">drwxr-xr-x quantum-web-framework/</div>
+				<div class="output">drwxr-xr-x neural-chat-interface/</div>
+				<div class="output">drwxr-xr-x holographic-dashboard/</div>
+				<div class="output">drwxr-xr-x matrix-portfolio/</div>
+
+				<div class="cli-line">
+					<span class="prompt">root@matrix:~$</span>
+					<span class="command">cat message.txt</span>
+				</div>
+				<div class="output">"Welcome to the digital realm. Here, code becomes reality and imagination shapes the future."</div>
+
+				<div class="cli-line">
+					<span class="prompt">root@matrix:~$</span>
+					<span class="command typing">_</span>
+				</div>
+			</div>
+		</div>
+
+		<nav class="nav-grid">
+			<a href="#" class="nav-button">
+				<div>Projects</div>
+				<small>Browse Portfolio</small>
+			</a>
+			<a href="#" class="nav-button">
+				<div>Neural Network</div>
+				<small>AI & ML Projects</small>
+			</a>
+			<a href="#" class="nav-button">
+				<div>Code Repository</div>
+				<small>GitHub Archive</small>
+			</a>
+			<a href="#" class="nav-button">
+				<div>Contact Matrix</div>
+				<small>Establish Connection</small>
+			</a>
+		</nav>
+
+		<div class="terminal" style="margin-top: 3rem">
+			<div class="terminal-header">
+				<div class="terminal-dots">
+					<div class="dot"></div>
+					<div class="dot"></div>
+					<div class="dot"></div>
+				</div>
+				<div class="terminal-title">About This Digital Entity</div>
+			</div>
+			<div class="terminal-content">
+				<p>Greetings, fellow digital wanderer. You have accessed the personal matrix of Sinan Bakim.</p>
+				<br />
+				<p>
+					In this realm of infinite possibilities, I craft digital experiences that bridge the gap between imagination and reality. Every line of code is a pathway, every
+					algorithm a key to unlock new dimensions of human-computer interaction.
+				</p>
+				<br />
+				<p>
+					This cyberpunk-inspired interface represents more than just aesthetics—it embodies a philosophy where technology and creativity converge to create something
+					greater than the sum of its parts.
+				</p>
+				<br />
+				<p style="color: var(--matrix-green)">STATUS: Ready to collaborate on your next digital adventure.</p>
+			</div>
+		</div>
+
+		<script>
+			// Matrix rain effect
+			function createMatrixRain() {
+				const canvas = document.createElement('canvas');
+				canvas.style.position = 'fixed';
+				canvas.style.top = '0';
+				canvas.style.left = '0';
+				canvas.style.width = '100%';
+				canvas.style.height = '100%';
+				canvas.style.pointerEvents = 'none';
+				canvas.style.zIndex = '-1';
+				canvas.style.opacity = '0.1';
+
+				document.querySelector('.matrix-bg').appendChild(canvas);
+
+				const ctx = canvas.getContext('2d');
+				canvas.width = window.innerWidth;
+				canvas.height = window.innerHeight;
+
+				const matrix = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%+-/~{[|`]}';
+				const matrixArray = matrix.split('');
+
+				const fontSize = 10;
+				const columns = canvas.width / fontSize;
+
+				const drops = [];
+				for (let x = 0; x < columns; x++) {
+					drops[x] = 1;
+				}
+
+				function draw() {
+					ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+					ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+					ctx.fillStyle = '#00ff00';
+					ctx.font = fontSize + 'px monospace';
+
+					for (let i = 0; i < drops.length; i++) {
+						const text = matrixArray[Math.floor(Math.random() * matrixArray.length)];
+						ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+						if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+							drops[i] = 0;
+						}
+						drops[i]++;
+					}
+				}
+
+				setInterval(draw, 35);
+			}
+
+			// Initialize matrix effect
+			createMatrixRain();
+
+			// Handle window resize
+			window.addEventListener('resize', () => {
+				location.reload();
+			});
+
+			// Add interactive hover effects
+			document.querySelectorAll('.hud-panel').forEach((panel) => {
+				panel.addEventListener('mouseenter', () => {
+					panel.style.boxShadow = 'inset 0 0 30px rgba(0, 255, 255, 0.2), 0 0 20px rgba(0, 255, 255, 0.3)';
+				});
+
+				panel.addEventListener('mouseleave', () => {
+					panel.style.boxShadow = 'inset 0 0 20px rgba(0, 255, 255, 0.1)';
+				});
+			});
+		</script>
+	</body>
+</html>

@@ -1,0 +1,1668 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Flow Node Framework</title>
+		<style>
+			body {
+				margin: 0;
+				padding: 20px;
+				background: #121212;
+				color: #e0e0e0;
+				font-family: 'Courier New', monospace;
+				min-height: 100vh;
+			}
+
+			.node-container {
+				max-width: 1200px;
+				margin: 0 auto;
+			}
+
+			.editor-tabs {
+				display: flex;
+				gap: 1px;
+				margin-bottom: 20px;
+			}
+
+			.tab {
+				background: #333;
+				color: #bb86fc;
+				padding: 10px 20px;
+				cursor: pointer;
+				border: none;
+				transition: all 0.3s;
+			}
+
+			.tab.active {
+				background: #bb86fc;
+				color: #121212;
+			}
+
+			.editor-panel {
+				display: none;
+				grid-template-columns: 1fr 1fr;
+				gap: 20px;
+				margin-bottom: 20px;
+			}
+
+			.editor-panel.active {
+				display: grid;
+			}
+
+			.code-editor {
+				background: #1e1e1e;
+				border: 1px solid #333;
+				border-radius: 8px;
+				padding: 15px;
+				font-family: 'Courier New', monospace;
+				font-size: 14px;
+				color: #e0e0e0;
+				min-height: 300px;
+				resize: vertical;
+			}
+
+			.preview-panel {
+				background: #2a2a2a;
+				border: 1px solid #333;
+				border-radius: 8px;
+				padding: 15px;
+				overflow: auto;
+			}
+
+			.flow-node {
+				position: relative;
+				background: linear-gradient(135deg, #1a1a2e, #16213e);
+				border: 2px solid #bb86fc;
+				border-radius: 12px;
+				padding: 20px;
+				min-width: 200px;
+				box-shadow: 0 0 20px rgba(187, 134, 252, 0.3);
+			}
+
+			.node-header {
+				text-align: center;
+				color: #bb86fc;
+				font-weight: bold;
+				margin-bottom: 15px;
+				font-size: 14px;
+			}
+
+			.node-ports {
+				position: absolute;
+				top: 50%;
+				transform: translateY(-50%);
+			}
+
+			.node-ports.inputs {
+				left: -8px;
+			}
+
+			.node-ports.outputs {
+				right: -8px;
+			}
+
+			.port {
+				width: 16px;
+				height: 16px;
+				border-radius: 50%;
+				margin: 8px 0;
+				cursor: pointer;
+				transition: all 0.3s;
+				position: relative;
+			}
+
+			.port.number {
+				background: #ff6b6b;
+			}
+			.port.string {
+				background: #4ecdc4;
+			}
+			.port.boolean {
+				background: #45b7d1;
+			}
+			.port.object {
+				background: #96ceb4;
+			}
+			.port.array {
+				background: #ffeaa7;
+			}
+			.port.function {
+				background: #a29bfe;
+			}
+			.port.any {
+				background: #fd79a8;
+			}
+
+			.port:hover {
+				transform: scale(1.3);
+				box-shadow: 0 0 10px currentColor;
+			}
+
+			.node-content {
+				min-height: 60px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				text-align: center;
+			}
+
+			.controls {
+				display: flex;
+				gap: 10px;
+				margin-top: 20px;
+				justify-content: center;
+			}
+
+			.btn {
+				background: #bb86fc;
+				color: #121212;
+				border: none;
+				padding: 8px 16px;
+				border-radius: 6px;
+				cursor: pointer;
+				font-family: inherit;
+				transition: all 0.3s;
+			}
+
+			.btn:hover {
+				background: #9965f4;
+				transform: translateY(-2px);
+			}
+
+			.error {
+				background: #ff4757;
+				color: white;
+				padding: 10px;
+				border-radius: 6px;
+				margin-top: 10px;
+			}
+
+			.syntax-highlight {
+				color: #ff6b6b;
+			}
+
+			.syntax-highlight.keyword {
+				color: #bb86fc;
+			}
+
+			.syntax-highlight.string {
+				color: #4ecdc4;
+			}
+
+			.syntax-highlight.comment {
+				color: #666;
+				font-style: italic;
+			}
+
+			/* Node Navigation & Modal System */
+			.node-workspace {
+				position: relative;
+				min-height: 100vh;
+			}
+
+			.deployed-node {
+				position: absolute;
+				z-index: 100;
+				transition: all 0.3s ease;
+				outline: none;
+			}
+
+			.deployed-node.focused {
+				box-shadow: 0 0 20px #bb86fc, 0 0 40px rgba(187, 134, 252, 0.5);
+				transform: scale(1.02);
+				z-index: 200;
+			}
+
+			.deployed-node.has-modal {
+				z-index: 300;
+			}
+
+			/* Help System */
+			.help-overlay {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background: rgba(0, 0, 0, 0.9);
+				z-index: 9999;
+				display: none;
+				align-items: center;
+				justify-content: center;
+			}
+
+			.help-content {
+				background: linear-gradient(135deg, #1a1a2e, #16213e);
+				border: 2px solid #bb86fc;
+				border-radius: 15px;
+				padding: 30px;
+				max-width: 800px;
+				max-height: 80vh;
+				overflow-y: auto;
+				box-shadow: 0 0 30px rgba(187, 134, 252, 0.5);
+			}
+
+			.help-title {
+				color: #bb86fc;
+				font-size: 1.5rem;
+				text-align: center;
+				margin-bottom: 20px;
+				text-shadow: 0 0 10px rgba(187, 134, 252, 0.5);
+			}
+
+			.help-section {
+				margin-bottom: 25px;
+			}
+
+			.help-section h3 {
+				color: #03dac6;
+				font-size: 1.1rem;
+				margin-bottom: 10px;
+				border-bottom: 1px solid #333;
+				padding-bottom: 5px;
+			}
+
+			.shortcut-list {
+				display: grid;
+				grid-template-columns: 200px 1fr;
+				gap: 10px 20px;
+				margin-left: 15px;
+			}
+
+			.shortcut-key {
+				color: #ffa726;
+				font-weight: bold;
+				font-family: 'Courier New', monospace;
+			}
+
+			.shortcut-desc {
+				color: #e0e0e0;
+			}
+
+			/* Modal Embedding System */
+			.node-modal {
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				background: rgba(30, 30, 30, 0.98);
+				border: 2px solid #bb86fc;
+				border-radius: 12px;
+				padding: 20px;
+				z-index: 1000;
+				display: none;
+				box-shadow: 0 0 30px rgba(187, 134, 252, 0.7);
+				backdrop-filter: blur(10px);
+				min-width: 600px;
+				max-height: 80vh;
+				overflow-y: auto;
+			}
+
+			.node-modal.visible {
+				display: block;
+				animation: modalGrow 0.3s ease-out;
+			}
+
+			@keyframes modalGrow {
+				from {
+					transform: translate(-50%, -50%) scale(0.8);
+					opacity: 0;
+				}
+				to {
+					transform: translate(-50%, -50%) scale(1);
+					opacity: 1;
+				}
+			}
+
+			.modal-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				margin-bottom: 15px;
+				padding-bottom: 10px;
+				border-bottom: 1px solid #333;
+			}
+
+			.modal-title {
+				color: #bb86fc;
+				font-weight: bold;
+			}
+
+			.modal-close {
+				background: none;
+				border: none;
+				color: #ff6b6b;
+				font-size: 1.2rem;
+				cursor: pointer;
+				padding: 5px;
+			}
+
+			.navigation-hint {
+				position: fixed;
+				bottom: 20px;
+				right: 20px;
+				background: rgba(30, 30, 30, 0.9);
+				border: 1px solid #bb86fc;
+				border-radius: 8px;
+				padding: 10px 15px;
+				color: #bb86fc;
+				font-size: 0.8rem;
+				z-index: 500;
+				opacity: 0.7;
+				transition: opacity 0.3s;
+			}
+
+			.navigation-hint:hover {
+				opacity: 1;
+			}
+
+			/* Node Status Indicator */
+			.node-status {
+				position: absolute;
+				top: -8px;
+				right: -8px;
+				width: 16px;
+				height: 16px;
+				border-radius: 50%;
+				background: #4caf50;
+				border: 2px solid #121212;
+				box-shadow: 0 0 5px #4caf50;
+			}
+
+			.node-status.focused {
+				background: #bb86fc;
+				box-shadow: 0 0 10px #bb86fc;
+			}
+
+			.node-status.editing {
+				background: #ffa726;
+				box-shadow: 0 0 10px #ffa726;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="node-workspace">
+			<!-- Help Overlay -->
+			<div class="help-overlay" id="helpOverlay">
+				<div class="help-content">
+					<div class="help-title">🚀 Flow Node Framework - Bedienungsanleitung</div>
+					
+					<div class="help-section">
+						<h3>📋 Allgemeine Navigation</h3>
+						<div class="shortcut-list">
+							<span class="shortcut-key">F1</span>
+							<span class="shortcut-desc">Diese Hilfe anzeigen/schließen</span>
+							<span class="shortcut-key">F10</span>
+							<span class="shortcut-desc">Node Editor öffnen/schließen</span>
+							<span class="shortcut-key">ESC</span>
+							<span class="shortcut-desc">Aktuelle Aktion abbrechen / Modal schließen</span>
+							<span class="shortcut-key">Tab</span>
+							<span class="shortcut-desc">Zur nächsten Node wechseln</span>
+							<span class="shortcut-key">Shift + Tab</span>
+							<span class="shortcut-desc">Zur vorherigen Node wechseln</span>
+						</div>
+					</div>
+
+					<div class="help-section">
+						<h3>⚡ Node-Steuerung</h3>
+						<div class="shortcut-list">
+							<span class="shortcut-key">Ctrl + S</span>
+							<span class="shortcut-desc">Aktuelle Node speichern/exportieren</span>
+							<span class="shortcut-key">Ctrl + D</span>
+							<span class="shortcut-desc">Node duplizieren</span>
+							<span class="shortcut-key">Ctrl + R</span>
+							<span class="shortcut-desc">Node neu kompilieren</span>
+							<span class="shortcut-key">Delete</span>
+							<span class="shortcut-desc">Fokussierte Node löschen</span>
+							<span class="shortcut-key">Enter</span>
+							<span class="shortcut-desc">Node aktivieren/ausführen</span>
+						</div>
+					</div>
+
+					<div class="help-section">
+						<h3>🔧 Editor-Funktionen</h3>
+						<div class="shortcut-list">
+							<span class="shortcut-key">F2</span>
+							<span class="shortcut-desc">Template (TNL) Editor</span>
+							<span class="shortcut-key">F3</span>
+							<span class="shortcut-desc">Logic (LNL) Editor</span>
+							<span class="shortcut-key">F4</span>
+							<span class="shortcut-desc">Design (DNL) Editor</span>
+							<span class="shortcut-key">F5</span>
+							<span class="shortcut-desc">Live Preview aktualisieren</span>
+							<span class="shortcut-key">Ctrl + Enter</span>
+							<span class="shortcut-desc">Code kompilieren und ausführen</span>
+						</div>
+					</div>
+
+					<div class="help-section">
+						<h3>🌐 Node-Netzwerk</h3>
+						<div class="shortcut-list">
+							<span class="shortcut-key">Ctrl + N</span>
+							<span class="shortcut-desc">Neue Node erstellen</span>
+							<span class="shortcut-key">Ctrl + L</span>
+							<span class="shortcut-desc">Alle Nodes auflisten</span>
+							<span class="shortcut-key">Ctrl + F</span>
+							<span class="shortcut-desc">Node suchen</span>
+							<span class="shortcut-key">F12</span>
+							<span class="shortcut-desc">Node-Inspector (Debug-Modus)</span>
+						</div>
+					</div>
+
+					<div class="help-section">
+						<h3>💾 Projekt-Management</h3>
+						<div class="shortcut-list">
+							<span class="shortcut-key">Ctrl + O</span>
+							<span class="shortcut-desc">Node-Projekt laden</span>
+							<span class="shortcut-key">Ctrl + Shift + S</span>
+							<span class="shortcut-desc">Gesamtes Projekt speichern</span>
+							<span class="shortcut-key">Ctrl + E</span>
+							<span class="shortcut-desc">Node exportieren</span>
+							<span class="shortcut-key">Ctrl + I</span>
+							<span class="shortcut-desc">Node importieren</span>
+						</div>
+					</div>
+
+					<div class="help-section">
+						<h3>🎯 Spezial-Features</h3>
+						<div class="shortcut-list">
+							<span class="shortcut-key">Ctrl + Shift + R</span>
+							<span class="shortcut-desc">Node replizieren in neues Fenster</span>
+							<span class="shortcut-key">Ctrl + M</span>
+							<span class="shortcut-desc">Node-Memory anzeigen</span>
+							<span class="shortcut-key">Ctrl + T</span>
+							<span class="shortcut-desc">Node-Tests ausführen</span>
+							<span class="shortcut-key">F11</span>
+							<span class="shortcut-desc">Vollbild-Modus für Node</span>
+						</div>
+					</div>
+
+					<div class="help-section">
+						<h3>🎮 Node-Typen</h3>
+						<p style="margin-left: 15px; color: #ccc; font-size: 0.9rem;">
+							• <strong>Container:</strong> Standard-Node für UI-Elemente<br>
+							• <strong>Canvas:</strong> Grafik und Zeichenfunktionen<br>
+							• <strong>Paint:</strong> Pixel-Art Editor (16x16 Grid)<br>
+							• <strong>Button:</strong> Interaktive Schaltflächen<br>
+							• <strong>Form:</strong> Formulare und Eingabefelder<br>
+							• <strong>Calculator:</strong> Wissenschaftlicher Rechner<br>
+							• <strong>Custom:</strong> Benutzerdefinierte Node-Typen
+						</p>
+					</div>
+
+					<div style="text-align: center; margin-top: 25px; padding-top: 15px; border-top: 1px solid #333;">
+						<span style="color: #666; font-size: 0.8rem;">
+							Drücke F1 erneut zum Schließen • Flow Node Framework v1.0
+						</span>
+					</div>
+				</div>
+			</div>
+
+			<!-- Navigation Hint -->
+			<div class="navigation-hint" id="navHint">
+				F1: Hilfe • F10: Editor • Tab: Node wechseln
+			</div>
+
+		<div class="node-container">
+			<!-- Hidden Editor Modal -->
+			<div class="node-modal" id="editorModal">
+				<div class="modal-header">
+					<div class="modal-title">📝 Node Editor</div>
+					<button class="modal-close" onclick="closeEditorModal()">&times;</button>
+				</div>
+				<div id="editorContent">
+					<!-- Editor content will be moved here -->
+				</div>
+			</div>
+
+			<h1 style="text-align: center; color: #bb86fc; margin-bottom: 30px">Flow Node Framework</h1>
+
+			<div class="editor-tabs">
+				<button class="tab active" data-tab="template">Template (TNL)</button>
+				<button class="tab" data-tab="logic">Logic (LNL)</button>
+				<button class="tab" data-tab="design">Design (DNL)</button>
+			</div>
+
+			<!-- Template Editor -->
+			<div class="editor-panel active" id="template-panel">
+				<div>
+					<h3 style="color: #bb86fc; margin-bottom: 10px">Template Node Language (TNL)</h3>
+					<textarea
+						class="code-editor"
+						id="template-code"
+						placeholder="# TNL Syntax
+node[Math Calculator]
+  header: 'Math Ops'
+  layout: flex.col
+  
+  input[a]: number @left.top
+  input[b]: number @left.bottom  
+  output[result]: number @right.center
+  
+  body:
+    display: '{a} {op} {b} = {result}'
+    button[+,-,*,/] @op -> trigger.calc
+    
+  responsive:
+    @mobile: layout.stack
+    @tablet: scale(0.8)"
+					>
+Math Calculator Node</textarea
+					>
+				</div>
+				<div class="preview-panel">
+					<h4 style="color: #4ecdc4; margin-bottom: 15px">Template Preview</h4>
+					<div id="template-preview"></div>
+				</div>
+			</div>
+
+			<!-- Logic Editor -->
+			<div class="editor-panel" id="logic-panel">
+				<div>
+					<h3 style="color: #bb86fc; margin-bottom: 10px">Logic Node Language (LNL)</h3>
+					<textarea
+						class="code-editor"
+						id="logic-code"
+						placeholder="# LNL Syntax
+interfaces:
+  in: [a:num, b:num, op:str]
+  out: [result:num, error:str?]
+  
+state: {a:0, b:0, op:'+', result:0}
+
+calc() ->
+  switch op:
+    '+': result = a + b
+    '-': result = a - b  
+    '*': result = a * b
+    '/': result = a / (b || 1)
+  emit(result)
+  
+validate(val, type) ->
+  return type.check(val)
+  
+export: [calc, validate]
+discovery: auto.scan(['math', 'calc', 'number'])"
+					>
+Logic Definition</textarea
+					>
+				</div>
+				<div class="preview-panel">
+					<h4 style="color: #4ecdc4; margin-bottom: 15px">Logic Preview</h4>
+					<div id="logic-preview"></div>
+				</div>
+			</div>
+
+			<!-- Design Editor -->
+			<div class="editor-panel" id="design-panel">
+				<div>
+					<h3 style="color: #bb86fc; margin-bottom: 10px">Design Node Language (DNL)</h3>
+					<textarea
+						class="code-editor"
+						id="design-code"
+						placeholder="# DNL Syntax
+theme: cyber.dark
+
+node:
+  bg: grad(#1a1a2e, #16213e)
+  border: 2px solid $primary
+  shadow: glow($primary, 20px)
+  radius: 12px
+  
+ports:
+  number: #ff6b6b
+  string: #4ecdc4  
+  boolean: #45b7d1
+  object: #96ceb4
+  
+animations:
+  hover: scale(1.05) + glow.pulse
+  active: shake(2px, 0.3s)
+  data.flow: pulse.ring($port.color)
+  
+responsive:
+  mobile: scale(0.8)
+  tablet: compact.layout
+  
+export: theme.cyber"
+					>
+Style Definition</textarea
+					>
+				</div>
+				<div class="preview-panel">
+					<h4 style="color: #4ecdc4; margin-bottom: 15px">Design Preview</h4>
+					<div id="design-preview"></div>
+				</div>
+			</div>
+
+			<!-- Live Node Preview -->
+			<div style="margin-top: 40px; text-align: center">
+				<h3 style="color: #bb86fc; margin-bottom: 20px">Live Node Preview</h3>
+				<div id="live-node"></div>
+			</div>
+
+			<div class="controls">
+				<button class="btn" onclick="compileNode()">Compile Node</button>
+				<button class="btn" onclick="exportNode()">Export</button>
+				<button class="btn" onclick="loadExample()">Load Example</button>
+				<button class="btn" onclick="deployNode()">Deploy</button>
+			</div>
+
+			<div id="error-output"></div>
+		</div>
+
+		<script>
+			// Self-Replicating Node DNA Core
+			class SelfReplicatingNode {
+				constructor(scope = window) {
+					this.scope = scope;
+					this.id = 'node_' + Math.random().toString(36).substr(2, 9);
+					this.entities = new Map();
+					this.environment = this.scanEnvironment();
+					this.parsers = {
+						tnl: new TNLParser(),
+						lnl: new LNLParser(),
+						dnl: new DNLParser(),
+					};
+					this.registerInScope();
+				}
+
+				scanEnvironment() {
+					const env = { apis: [], elements: [], capabilities: [] };
+					try {
+						// Scan for available APIs
+						Object.getOwnPropertyNames(this.scope).forEach((name) => {
+							if (typeof this.scope[name] === 'function' || typeof this.scope[name] === 'object') {
+								env.apis.push({ name, ref: this.scope[name] });
+							}
+						});
+						// Scan for DOM capabilities
+						if (this.scope.document) {
+							env.capabilities.push('dom', 'canvas', 'events');
+							env.elements = Array.from(this.scope.document.querySelectorAll('*'));
+						}
+						// Scan for other nodes
+						if (this.scope.NODES) {
+							env.capabilities.push('node-communication');
+						}
+					} catch (e) {}
+					return env;
+				}
+
+				registerInScope() {
+					if (!this.scope.NODES) this.scope.NODES = new Map();
+					this.scope.NODES.set(this.id, this);
+				}
+
+				replicate(targetScope = window) {
+					// Inject self-replicating DNA into target scope
+					const dnaScript = targetScope.document.createElement('script');
+					dnaScript.textContent = this.getDNA() + '; new SelfReplicatingNode();';
+					targetScope.document.head.appendChild(dnaScript);
+				}
+
+				getDNA() {
+					// Returns the complete source code of this node framework
+					return document.querySelector('script').textContent;
+				}
+
+				communicate(nodeId, message) {
+					const targetNode = this.scope.NODES?.get(nodeId);
+					if (targetNode) return targetNode.receive(message);
+					return null;
+				}
+
+				receive(message) {
+					if (this.messageHandler) return this.messageHandler(message);
+					return { status: 'no_handler', message };
+				}
+			}
+
+			class FlowNodeFramework extends SelfReplicatingNode {
+				constructor() {
+					super();
+					this.dataTypes = {
+						number: { color: '#ff6b6b', validate: (v) => typeof v === 'number' },
+						string: { color: '#4ecdc4', validate: (v) => typeof v === 'string' },
+						boolean: { color: '#45b7d1', validate: (v) => typeof v === 'boolean' },
+						object: { color: '#96ceb4', validate: (v) => typeof v === 'object' },
+						array: { color: '#ffeaa7', validate: (v) => Array.isArray(v) },
+						function: { color: '#a29bfe', validate: (v) => typeof v === 'function' },
+						any: { color: '#fd79a8', validate: () => true },
+					};
+				}
+
+				compile(tnl, lnl, dnl) {
+					try {
+						const template = this.parsers.tnl.parse(tnl);
+						const logic = this.parsers.lnl.parse(lnl);
+						const design = this.parsers.dnl.parse(dnl);
+
+						return this.createEntity(template, logic, design);
+					} catch (error) {
+						this.showError(error.message);
+						return null;
+					}
+				}
+
+				createEntity(template, logic, design) {
+					// Create entity based on template type
+					const entityType = template.type || 'container';
+					let entity;
+
+					switch (entityType) {
+						case 'canvas':
+							entity = this.createCanvasEntity(template, logic, design);
+							break;
+						case 'button':
+							entity = this.createButtonEntity(template, logic, design);
+							break;
+						case 'form':
+							entity = this.createFormEntity(template, logic, design);
+							break;
+						case 'paint':
+							entity = this.createPaintEntity(template, logic, design);
+							break;
+						default:
+							entity = this.createContainerEntity(template, logic, design);
+					}
+
+					// Inject DNA into entity
+					entity._dna = this.getDNA();
+					entity._framework = this;
+
+					// Setup communication
+					entity.communicate = (target, message) => this.communicate(target, message);
+					entity.replicate = (targetScope) => this.replicate(targetScope);
+
+					return entity;
+				}
+
+				createCanvasEntity(template, logic, design) {
+					const canvas = document.createElement('canvas');
+					canvas.width = template.width || 256;
+					canvas.height = template.height || 256;
+
+					this.attachLogic(canvas, logic);
+					this.applyDesign(canvas, design);
+
+					return canvas;
+				}
+
+				createButtonEntity(template, logic, design) {
+					const button = document.createElement('button');
+					button.textContent = template.text || 'Button';
+
+					this.attachLogic(button, logic);
+					this.applyDesign(button, design);
+
+					return button;
+				}
+
+				createFormEntity(template, logic, design) {
+					const form = document.createElement('form');
+					form.innerHTML = this.renderFormFields(template.fields || []);
+
+					this.attachLogic(form, logic);
+					this.applyDesign(form, design);
+
+					return form;
+				}
+
+				createPaintEntity(template, logic, design) {
+					const container = document.createElement('div');
+					const canvas = document.createElement('canvas');
+					const ctx = canvas.getContext('2d');
+
+					canvas.width = template.gridSize || 16;
+					canvas.height = template.gridSize || 16;
+					canvas.style.width = '256px';
+					canvas.style.height = '256px';
+					canvas.style.imageRendering = 'pixelated';
+
+					// Add pixel grid functionality
+					let isDrawing = false;
+					canvas.addEventListener('mousedown', (e) => {
+						isDrawing = true;
+						this.drawPixel(canvas, e, template.color || '#000');
+					});
+					canvas.addEventListener('mousemove', (e) => {
+						if (isDrawing) this.drawPixel(canvas, e, template.color || '#000');
+					});
+					canvas.addEventListener('mouseup', () => (isDrawing = false));
+
+					container.appendChild(canvas);
+					this.attachLogic(container, logic);
+					this.applyDesign(container, design);
+
+					return container;
+				}
+
+				drawPixel(canvas, event, color) {
+					const rect = canvas.getBoundingClientRect();
+					const x = Math.floor((event.clientX - rect.left) / (rect.width / canvas.width));
+					const y = Math.floor((event.clientY - rect.top) / (rect.height / canvas.height));
+
+					const ctx = canvas.getContext('2d');
+					ctx.fillStyle = color;
+					ctx.fillRect(x, y, 1, 1);
+				}
+
+				createContainerEntity(template, logic, design) {
+					const container = document.createElement('div');
+					container.innerHTML = this.renderTemplate(template);
+
+					this.attachLogic(container, logic);
+					this.applyDesign(container, design);
+
+					return container;
+				}
+
+				renderTemplate(template) {
+					return template.html || template.content || '';
+				}
+
+				renderFormFields(fields) {
+					return fields
+						.map((field) => {
+							const type = field.type || 'text';
+							return `<div><label>${field.label}</label><input type="${type}" name="${field.name}" /></div>`;
+						})
+						.join('');
+				}
+
+				attachLogic(element, logic) {
+					// Bind functions to element
+					Object.keys(logic.functions || {}).forEach((name) => {
+						element[name] = logic.functions[name].bind(element);
+					});
+
+					// Set up state management
+					element._state = { ...logic.state };
+					element._logic = logic;
+
+					// Setup environment discovery
+					element.discover = () => this.environment;
+					element.findNodes = () => Array.from(this.scope.NODES?.values() || []);
+
+					// Setup communication handlers
+					if (logic.onMessage) {
+						element.onMessage = logic.onMessage.bind(element);
+					}
+				}
+
+				applyDesign(element, design) {
+					// Apply CSS variables and styles
+					Object.keys(design.styles || {}).forEach((prop) => {
+						element.style.setProperty(`--${prop}`, design.styles[prop]);
+					});
+
+					// Apply direct styles
+					Object.keys(design.css || {}).forEach((prop) => {
+						element.style[prop] = design.css[prop];
+					});
+
+					// Apply theme
+					if (design.theme) {
+						element.classList.add(`theme-${design.theme}`);
+					}
+				}
+
+				showError(message) {
+					const errorDiv = document.getElementById('error-output');
+					errorDiv.innerHTML = `<div class="error">${message}</div>`;
+					setTimeout(() => (errorDiv.innerHTML = ''), 5000);
+				}
+			}
+
+			// TNL Parser (Template Node Language)
+			class TNLParser {
+				parse(code) {
+					const lines = code.split('\n').filter((l) => l.trim() && !l.startsWith('#'));
+					const result = {
+						type: 'container',
+						content: '',
+						width: 256,
+						height: 256,
+						gridSize: 16,
+						color: '#000000',
+						fields: [],
+					};
+
+					lines.forEach((line) => {
+						const trimmed = line.trim();
+
+						if (trimmed.startsWith('type:')) {
+							result.type = trimmed.split(':')[1].trim();
+						} else if (trimmed.startsWith('content:')) {
+							result.content = trimmed.split(':')[1].trim().replace(/'/g, '');
+						} else if (trimmed.startsWith('html:')) {
+							result.html = trimmed.split(':')[1].trim().replace(/'/g, '');
+						} else if (trimmed.startsWith('width:')) {
+							result.width = parseInt(trimmed.split(':')[1].trim());
+						} else if (trimmed.startsWith('height:')) {
+							result.height = parseInt(trimmed.split(':')[1].trim());
+						} else if (trimmed.startsWith('text:')) {
+							result.text = trimmed.split(':')[1].trim().replace(/'/g, '');
+						} else if (trimmed.startsWith('color:')) {
+							result.color = trimmed.split(':')[1].trim();
+						} else if (trimmed.startsWith('grid:')) {
+							result.gridSize = parseInt(trimmed.split(':')[1].trim());
+						}
+					});
+
+					return result;
+				}
+			}
+
+			// LNL Parser (Logic Node Language)
+			class LNLParser {
+				parse(code) {
+					const result = {
+						state: {},
+						functions: {},
+						onMessage: null,
+						discovery: [],
+					};
+
+					// Parse functions
+					const functionMatches = code.match(/(\w+)\(\)\s*->\s*([\s\S]*?)(?=\n\w+\(|$)/g);
+					if (functionMatches) {
+						functionMatches.forEach((match) => {
+							const [, name, body] = match.match(/(\w+)\(\)\s*->\s*([\s\S]*)/);
+							result.functions[name] = new Function(`
+								// ${name} function
+								${this.convertLNLToJS(body)}
+							`);
+						});
+					}
+
+					// Parse state
+					const stateMatch = code.match(/state:\s*\{([^}]+)\}/);
+					if (stateMatch) {
+						result.state = this.parseObject(stateMatch[1]);
+					}
+
+					// Parse discovery rules
+					const discoveryMatch = code.match(/discovery:\s*\[([^\]]+)\]/);
+					if (discoveryMatch) {
+						result.discovery = discoveryMatch[1].split(',').map((s) => s.trim().replace(/'/g, ''));
+					}
+
+					return result;
+				}
+
+				convertLNLToJS(lnlCode) {
+					return lnlCode
+						.replace(/emit\((.*?)\)/g, 'this.emit && this.emit($1)')
+						.replace(/scan\((.*?)\)/g, 'this.discover().apis.filter(api => $1)')
+						.replace(/connect\((.*?)\)/g, 'this.communicate($1)')
+						.replace(/console\.log/g, 'console.log');
+				}
+
+				parseObject(str) {
+					try {
+						return eval(`({${str}})`);
+					} catch {
+						return {};
+					}
+				}
+			}
+
+			// DNL Parser (Design Node Language)
+			class DNLParser {
+				parse(code) {
+					const result = {
+						theme: 'default',
+						styles: {},
+						css: {},
+						animations: {},
+					};
+
+					const lines = code.split('\n').filter((l) => l.trim() && !l.startsWith('#'));
+
+					lines.forEach((line) => {
+						const trimmed = line.trim();
+
+						if (trimmed.startsWith('theme:')) {
+							result.theme = trimmed.split(':')[1].trim();
+						} else if (trimmed.startsWith('bg:')) {
+							result.css.background = trimmed.split(':')[1].trim();
+						} else if (trimmed.startsWith('border:')) {
+							result.css.border = trimmed.split(':')[1].trim();
+						} else if (trimmed.startsWith('width:')) {
+							result.css.width = trimmed.split(':')[1].trim();
+						} else if (trimmed.startsWith('height:')) {
+							result.css.height = trimmed.split(':')[1].trim();
+						} else if (trimmed.startsWith('color:')) {
+							result.css.color = trimmed.split(':')[1].trim();
+						} else if (trimmed.includes(':') && !trimmed.startsWith('  ')) {
+							// Parse CSS-like properties
+							const [prop, value] = trimmed.split(':').map((s) => s.trim());
+							result.styles[prop] = value;
+						}
+					});
+
+					return result;
+				}
+			}
+
+			// Initialize framework
+			const framework = new FlowNodeFramework();
+
+			// Tab switching
+			document.querySelectorAll('.tab').forEach((tab) => {
+				tab.addEventListener('click', () => {
+					// Update active tab
+					document.querySelectorAll('.tab').forEach((t) => t.classList.remove('active'));
+					tab.classList.add('active');
+
+					// Show corresponding panel
+					document.querySelectorAll('.editor-panel').forEach((p) => p.classList.remove('active'));
+					document.getElementById(`${tab.dataset.tab}-panel`).classList.add('active');
+				});
+			});
+
+			function compileNode() {
+				const tnl = document.getElementById('template-code').value;
+				const lnl = document.getElementById('logic-code').value;
+				const dnl = document.getElementById('design-code').value;
+
+				const entity = framework.compile(tnl, lnl, dnl);
+				if (entity) {
+					const livePreview = document.getElementById('live-node');
+					livePreview.innerHTML = '';
+					livePreview.appendChild(entity);
+
+					// Show entity info
+					console.log('Entity created:', entity);
+					console.log('Available nodes in scope:', Array.from(framework.scope.NODES?.keys() || []));
+					console.log('Environment capabilities:', framework.environment.capabilities);
+				}
+			}
+
+			function exportNode() {
+				const tnl = document.getElementById('template-code').value;
+				const lnl = document.getElementById('logic-code').value;
+				const dnl = document.getElementById('design-code').value;
+
+				const nodeData = {
+					version: '1.0',
+					framework: 'FlowNode',
+					tnl,
+					lnl,
+					dnl,
+					timestamp: new Date().toISOString(),
+				};
+
+				const blob = new Blob([JSON.stringify(nodeData, null, 2)], { type: 'application/json' });
+				const url = URL.createObjectURL(blob);
+				const a = document.createElement('a');
+				a.href = url;
+				a.download = 'node.fnf';
+				a.click();
+			}
+
+			function loadExample() {
+				document.getElementById('template-code').value = `# 16x16 Pixel Paint Tool
+type: paint
+grid: 16
+color: #ff0000
+width: 256
+height: 256`;
+
+				document.getElementById('logic-code').value = `# Paint Tool Logic
+state: {currentColor: '#ff0000', grid: [], history: []}
+
+changeColor(newColor) ->
+  this.currentColor = newColor
+  
+saveToHistory() ->
+  this.history.push([...this.grid])
+  
+findOtherPaintTools() ->
+  scan(api => api.name.includes('paint'))
+  
+broadcastPixel(x, y, color) ->
+  this.findNodes().forEach(node => {
+    if (node.type === 'paint') {
+      connect(node.id, {type: 'pixel', x, y, color})
+    }
+  })
+
+discovery: ['paint', 'canvas', 'draw']`;
+
+				document.getElementById('design-code').value = `# Cyberpunk Paint Style
+theme: neon
+bg: #1a1a2e
+border: 2px solid #00ffff
+color: #ffffff
+width: 300px
+height: 320px`;
+			}
+
+			function deployNode() {
+				console.log('Deploying self-replicating entity...');
+
+				// Show replication capability
+				const newWindow = window.open('', 'NodeTest', 'width=400,height=300');
+				newWindow.document.write(`
+					<html>
+						<head><title>Replicated Node</title></head>
+						<body>
+							<h3>Self-Replicated Node Environment</h3>
+							<div id="replicated-container"></div>
+						</body>
+					</html>
+				`);
+
+				// Replicate framework to new window
+				framework.replicate(newWindow);
+
+				framework.showError('Entity replicated to new window! Check console for node network.');
+			}
+
+			// Auto-compile on changes
+			['template-code', 'logic-code', 'design-code'].forEach((id) => {
+				document.getElementById(id).addEventListener('input', () => {
+					setTimeout(compileNode, 500);
+				});
+			});
+
+			// Load initial example
+			loadExample();
+			setTimeout(compileNode, 100);
+
+			// ========== KEYBOARD NAVIGATION SYSTEM ==========
+			
+			class NodeNavigationSystem {
+				constructor() {
+					this.deployedNodes = [];
+					this.currentFocusIndex = -1;
+					this.isEditorOpen = false;
+					this.isHelpOpen = false;
+					this.setupKeyboardHandlers();
+				}
+
+				setupKeyboardHandlers() {
+					document.addEventListener('keydown', (e) => {
+						// Prevent default browser shortcuts that conflict
+						if (this.handleShortcut(e)) {
+							e.preventDefault();
+							e.stopPropagation();
+						}
+					});
+				}
+
+				handleShortcut(e) {
+					const { key, ctrlKey, shiftKey, altKey } = e;
+					
+					// F1 - Help Toggle
+					if (key === 'F1') {
+						this.toggleHelp();
+						return true;
+					}
+					
+					// F10 - Editor Toggle
+					if (key === 'F10') {
+						this.toggleEditor();
+						return true;
+					}
+					
+					// ESC - Close modals/cancel
+					if (key === 'Escape') {
+						this.handleEscape();
+						return true;
+					}
+					
+					// Tab - Node navigation
+					if (key === 'Tab' && !this.isEditorOpen) {
+						this.navigateNodes(shiftKey);
+						return true;
+					}
+					
+					// Ctrl combinations
+					if (ctrlKey) {
+						return this.handleCtrlShortcuts(key, shiftKey, altKey);
+					}
+					
+					// Function keys for editor
+					if (this.isEditorOpen && key.startsWith('F')) {
+						return this.handleEditorFKeys(key);
+					}
+					
+					// Node-specific shortcuts
+					if (this.currentFocusIndex >= 0) {
+						return this.handleNodeShortcuts(key, e);
+					}
+					
+					return false;
+				}
+
+				handleCtrlShortcuts(key, shiftKey, altKey) {
+					switch (key) {
+						case 's':
+							if (shiftKey) {
+								this.saveAllNodes();
+							} else {
+								this.saveCurrentNode();
+							}
+							return true;
+						case 'd':
+							this.duplicateCurrentNode();
+							return true;
+						case 'r':
+							if (shiftKey) {
+								this.replicateCurrentNode();
+							} else {
+								this.recompileCurrentNode();
+							}
+							return true;
+						case 'n':
+							this.createNewNode();
+							return true;
+						case 'l':
+							this.listAllNodes();
+							return true;
+						case 'f':
+							this.searchNodes();
+							return true;
+						case 'o':
+							this.loadProject();
+							return true;
+						case 'e':
+							this.exportCurrentNode();
+							return true;
+						case 'i':
+							this.importNode();
+							return true;
+						case 'm':
+							this.showNodeMemory();
+							return true;
+						case 't':
+							this.runNodeTests();
+							return true;
+						case 'Enter':
+							compileNode();
+							return true;
+					}
+					return false;
+				}
+
+				handleEditorFKeys(key) {
+					switch (key) {
+						case 'F2':
+							this.switchToTab('template');
+							return true;
+						case 'F3':
+							this.switchToTab('logic');
+							return true;
+						case 'F4':
+							this.switchToTab('design');
+							return true;
+						case 'F5':
+							compileNode();
+							return true;
+						case 'F11':
+							this.toggleNodeFullscreen();
+							return true;
+						case 'F12':
+							this.openNodeInspector();
+							return true;
+					}
+					return false;
+				}
+
+				handleNodeShortcuts(key, e) {
+					const currentNode = this.deployedNodes[this.currentFocusIndex];
+					if (!currentNode) return false;
+
+					switch (key) {
+						case 'Enter':
+							this.activateCurrentNode();
+							return true;
+						case 'Delete':
+							this.deleteCurrentNode();
+							return true;
+						case 'F11':
+							this.toggleNodeFullscreen();
+							return true;
+					}
+					return false;
+				}
+
+				handleEscape() {
+					if (this.isHelpOpen) {
+						this.toggleHelp();
+					} else if (this.isEditorOpen) {
+						this.toggleEditor();
+					} else {
+						this.clearFocus();
+					}
+				}
+
+				// Node Management
+				registerNode(element) {
+					element.tabIndex = 0;
+					element.classList.add('deployed-node');
+					
+					// Add status indicator
+					const status = document.createElement('div');
+					status.className = 'node-status';
+					element.appendChild(status);
+					
+					// Position randomly for demo
+					const rect = document.querySelector('.node-workspace').getBoundingClientRect();
+					element.style.position = 'absolute';
+					element.style.left = Math.random() * (rect.width - 200) + 'px';
+					element.style.top = Math.random() * (rect.height - 200) + 200 + 'px';
+					
+					this.deployedNodes.push(element);
+					this.setupNodeEvents(element);
+					
+					return element;
+				}
+
+				setupNodeEvents(element) {
+					element.addEventListener('focus', () => {
+						this.focusNode(this.deployedNodes.indexOf(element));
+					});
+					
+					element.addEventListener('click', () => {
+						this.focusNode(this.deployedNodes.indexOf(element));
+					});
+				}
+
+				navigateNodes(reverse = false) {
+					if (this.deployedNodes.length === 0) return;
+					
+					if (reverse) {
+						this.currentFocusIndex = this.currentFocusIndex <= 0 
+							? this.deployedNodes.length - 1 
+							: this.currentFocusIndex - 1;
+					} else {
+						this.currentFocusIndex = (this.currentFocusIndex + 1) % this.deployedNodes.length;
+					}
+					
+					this.focusNode(this.currentFocusIndex);
+				}
+
+				focusNode(index) {
+					// Clear previous focus
+					this.deployedNodes.forEach((node, i) => {
+						node.classList.toggle('focused', i === index);
+						const status = node.querySelector('.node-status');
+						if (status) {
+							status.classList.toggle('focused', i === index);
+						}
+					});
+					
+					this.currentFocusIndex = index;
+					
+					if (index >= 0 && this.deployedNodes[index]) {
+						this.deployedNodes[index].focus();
+						this.deployedNodes[index].scrollIntoView({ 
+							behavior: 'smooth', 
+							block: 'center' 
+						});
+					}
+				}
+
+				clearFocus() {
+					this.deployedNodes.forEach(node => {
+						node.classList.remove('focused');
+						const status = node.querySelector('.node-status');
+						if (status) status.classList.remove('focused');
+					});
+					this.currentFocusIndex = -1;
+				}
+
+				// UI Controls
+				toggleHelp() {
+					this.isHelpOpen = !this.isHelpOpen;
+					document.getElementById('helpOverlay').style.display = 
+						this.isHelpOpen ? 'flex' : 'none';
+				}
+
+				toggleEditor() {
+					this.isEditorOpen = !this.isEditorOpen;
+					const modal = document.getElementById('editorModal');
+					const container = document.querySelector('.node-container');
+					
+					if (this.isEditorOpen) {
+						// Move editor content to modal
+						const content = document.getElementById('editorContent');
+						content.innerHTML = '';
+						
+						// Clone editor elements
+						const tabs = container.querySelector('.editor-tabs').cloneNode(true);
+						const panels = container.querySelectorAll('.editor-panel');
+						
+						content.appendChild(tabs);
+						panels.forEach(panel => {
+							content.appendChild(panel.cloneNode(true));
+						});
+						
+						// Setup tab functionality in modal
+						this.setupModalTabs();
+						
+						modal.classList.add('visible');
+						
+						// Focus current node if any
+						if (this.currentFocusIndex >= 0) {
+							const node = this.deployedNodes[this.currentFocusIndex];
+							node.classList.add('has-modal');
+						}
+					} else {
+						modal.classList.remove('visible');
+						this.deployedNodes.forEach(node => {
+							node.classList.remove('has-modal');
+						});
+					}
+				}
+
+				setupModalTabs() {
+					const modal = document.getElementById('editorModal');
+					const tabs = modal.querySelectorAll('.tab');
+					const panels = modal.querySelectorAll('.editor-panel');
+					
+					tabs.forEach(tab => {
+						tab.addEventListener('click', () => {
+							tabs.forEach(t => t.classList.remove('active'));
+							panels.forEach(p => p.classList.remove('active'));
+							
+							tab.classList.add('active');
+							const targetPanel = modal.querySelector(`#${tab.dataset.tab}-panel`);
+							if (targetPanel) {
+								targetPanel.classList.add('active');
+							}
+						});
+					});
+				}
+
+				switchToTab(tabName) {
+					const modal = document.getElementById('editorModal');
+					if (this.isEditorOpen && modal) {
+						const tab = modal.querySelector(`[data-tab="${tabName}"]`);
+						if (tab) tab.click();
+					}
+				}
+
+				// Node Actions
+				saveCurrentNode() {
+					if (this.currentFocusIndex >= 0) {
+						exportNode();
+						this.showNotification('💾 Node gespeichert');
+					}
+				}
+
+				saveAllNodes() {
+					// Implementation for saving all nodes
+					this.showNotification('💾 Alle Nodes gespeichert');
+				}
+
+				duplicateCurrentNode() {
+					if (this.currentFocusIndex >= 0) {
+						compileNode();
+						this.showNotification('📋 Node dupliziert');
+					}
+				}
+
+				recompileCurrentNode() {
+					compileNode();
+					this.showNotification('🔄 Node neu kompiliert');
+				}
+
+				replicateCurrentNode() {
+					deployNode();
+					this.showNotification('🌐 Node repliziert');
+				}
+
+				createNewNode() {
+					loadExample();
+					setTimeout(compileNode, 100);
+					this.showNotification('➕ Neue Node erstellt');
+				}
+
+				deleteCurrentNode() {
+					if (this.currentFocusIndex >= 0) {
+						const node = this.deployedNodes[this.currentFocusIndex];
+						node.remove();
+						this.deployedNodes.splice(this.currentFocusIndex, 1);
+						this.currentFocusIndex = -1;
+						this.showNotification('🗑️ Node gelöscht');
+					}
+				}
+
+				activateCurrentNode() {
+					if (this.currentFocusIndex >= 0) {
+						const node = this.deployedNodes[this.currentFocusIndex];
+						// Trigger node-specific activation
+						if (node.activate) {
+							node.activate();
+						} else {
+							// Default activation
+							const button = node.querySelector('button');
+							if (button) button.click();
+						}
+						this.showNotification('⚡ Node aktiviert');
+					}
+				}
+
+				listAllNodes() {
+					const nodeList = this.deployedNodes.map((node, i) => 
+						`${i}: ${node._framework?.id || 'Unknown'} - ${node.tagName}`
+					).join('\n');
+					
+					alert(`🌐 Aktive Nodes (${this.deployedNodes.length}):\n\n${nodeList}`);
+				}
+
+				searchNodes() {
+					const query = prompt('🔍 Node suchen:');
+					if (query) {
+						const found = this.deployedNodes.findIndex(node => 
+							node.textContent.toLowerCase().includes(query.toLowerCase()) ||
+							(node._framework?.id || '').toLowerCase().includes(query.toLowerCase())
+						);
+						
+						if (found >= 0) {
+							this.focusNode(found);
+							this.showNotification(`🎯 Node gefunden: ${found}`);
+						} else {
+							this.showNotification('❌ Keine Node gefunden');
+						}
+					}
+				}
+
+				showNodeMemory() {
+					if (this.currentFocusIndex >= 0) {
+						const node = this.deployedNodes[this.currentFocusIndex];
+						const memory = {
+							state: node._state || {},
+							logic: node._logic || {},
+							framework: node._framework?.id || 'Unknown'
+						};
+						console.log('🧠 Node Memory:', memory);
+						this.showNotification('🧠 Memory in Konsole angezeigt');
+					}
+				}
+
+				runNodeTests() {
+					this.showNotification('🧪 Tests ausgeführt - siehe Konsole');
+					console.log('🧪 Running node tests...');
+				}
+
+				toggleNodeFullscreen() {
+					if (this.currentFocusIndex >= 0) {
+						const node = this.deployedNodes[this.currentFocusIndex];
+						node.requestFullscreen?.();
+					}
+				}
+
+				openNodeInspector() {
+					if (this.currentFocusIndex >= 0) {
+						const node = this.deployedNodes[this.currentFocusIndex];
+						console.log('🔍 Node Inspector:', node);
+						this.showNotification('🔍 Inspector in Konsole');
+					}
+				}
+
+				loadProject() {
+					this.showNotification('📁 Projekt laden - Feature kommt bald');
+				}
+
+				exportCurrentNode() {
+					exportNode();
+				}
+
+				importNode() {
+					this.showNotification('📥 Import - Feature kommt bald');
+				}
+
+				showNotification(message) {
+					const hint = document.getElementById('navHint');
+					const originalText = hint.textContent;
+					hint.textContent = message;
+					hint.style.background = 'rgba(187, 134, 252, 0.8)';
+					
+					setTimeout(() => {
+						hint.textContent = originalText;
+						hint.style.background = 'rgba(30, 30, 30, 0.9)';
+					}, 2000);
+				}
+			}
+
+			// Global functions for modal
+			function closeEditorModal() {
+				navSystem.isEditorOpen = false;
+				document.getElementById('editorModal').classList.remove('visible');
+				navSystem.deployedNodes.forEach(node => {
+					node.classList.remove('has-modal');
+				});
+			}
+
+			// Initialize navigation system
+			const navSystem = new NodeNavigationSystem();
+
+			// Override the original compileNode to register nodes
+			const originalCompileNode = compileNode;
+			window.compileNode = function() {
+				originalCompileNode();
+				
+				// Register the newly created node
+				const livePreview = document.getElementById('live-node');
+				const newNode = livePreview.lastElementChild;
+				if (newNode && !newNode.classList.contains('deployed-node')) {
+					// Move to workspace
+					document.querySelector('.node-workspace').appendChild(newNode);
+					navSystem.registerNode(newNode);
+					navSystem.focusNode(navSystem.deployedNodes.length - 1);
+				}
+			};
+		</script>
+		</div>
+	</body>
+</html>
+	</body>
+</html>

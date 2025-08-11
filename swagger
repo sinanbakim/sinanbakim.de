@@ -1,0 +1,227 @@
+from pathlib import Path
+openapi = r"""
+openapi: 3.0.3
+info:
+  title: Sinja Orchestration API
+  version: "1.0.0"
+  description: |
+    Simple persistence API for Custom GPT "Sinja".
+    Supports upload/append/download/list/status so the GPT can save progress,
+    resume work, and exchange artifacts.
+servers:
+  - url: https://sinanbakim.de
+    description: Production
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+  schemas:
+    UploadRequest:
+      type: object
+      required: [filename, content]
+      properties:
+        filename:
+          type: string
+          description: Target file name (no path)
+          example: phase_1_1_roles.md
+        content:
+          type: string
+          description: File content (utf8 string or base64-encoded depending on encoding)
+          example: "## Rollen ..."
+        encoding:
+          type: string
+          enum: [utf8, utf-8, base64]
+          default: utf8
+    AppendRequest:
+      type: object
+      required: [filename, content]
+      properties:
+        filename:
+          type: string
+          example: log.jsonl
+        content:
+          type: string
+          example: '{"ts":"2025-08-09T12:00:00Z","msg":"step done"}'
+        newline:
+          type: boolean
+          default: true
+    StatusRequest:
+      type: object
+      properties:
+        phase:
+          type: string
+          nullable: true
+          example: "1.1"
+        part:
+          type: string
+          nullable: true
+          example: conv_part_02.txt
+        extra:
+          type: object
+          nullable: true
+          description: Free-form metadata object
+    StatusResponse:
+      type: object
+      properties:
+        phase:
+          type: string
+          nullable: true
+        part:
+          type: string
+          nullable: true
+        extra:
+          type: object
+          nullable: true
+        updated:
+          type: string
+          format: date-time
+          nullable: true
+    ListResponse:
+      type: object
+      properties:
+        dir:
+          type: string
+        count:
+          type: integer
+        files:
+          type: array
+          items:
+            type: string
+paths:
+  /api/upload:
+    post:
+      summary: Upload or overwrite a file
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: saved phase_1_1_roles.md
+        "400":
+          description: Bad Request
+  /api/append:
+    post:
+      summary: Append text to a file
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppendRequest'
+      responses:
+        "200":
+          description: OK
+  /api/download/{filename}:
+    get:
+      summary: Download a file
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: filename
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: The file content
+          content:
+            text/plain:
+              schema:
+                type: string
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Not Found
+  /api/list:
+    get:
+      summary: List saved files
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: pattern
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Case-insensitive substring filter
+        - name: ext
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Extension filter such as ".md"
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1000
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListResponse'
+  /api/status:
+    get:
+      summary: Read processing status
+      security:
+        - ApiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusResponse'
+    post:
+      summary: Upsert processing status
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StatusRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  status:
+                    $ref: '#/components/schemas/StatusResponse'
+"""
+p = Path("/mnt/data/sinja-openapi.yaml")
+p.write_text(openapi.strip() + "\n", encoding="utf-8")
+print(str(p))
