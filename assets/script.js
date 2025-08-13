@@ -24,25 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		})
 		.catch((err) => {
 			console.error('Error loading JSON:', err);
-			// Fallback to github pages
-			Promise.all([
-				fetch('/sinanbakim.de/content/data.json').then((response) => response.json()),
-				fetch('/sinanbakim.de/content/user.json').then((response) => response.json()),
-			])
-				.then(([data, user]) => {
-					pageData = data;
-					userData = user;
-
-					// Create lookup maps for pages, sections, articles by id
-					pageData.pages.forEach((p) => (pageMap[p.id] = p));
-					pageData.sections.forEach((s) => (sectionMap[s.id] = s));
-					pageData.articles.forEach((a) => (articleMap[a.id] = a));
-
-					renderNavigation(pageData.pagetree);
-					populateArticles(pageData.articles);
-					setupContentLinks();
-				})
-				.catch((err) => console.error('Error loading JSON:', err));
+			// No fallback needed - content should be local
 		});
 
 	document.getElementById('modal-close').addEventListener('click', closeModal);
